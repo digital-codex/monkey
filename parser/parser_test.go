@@ -8,63 +8,67 @@ import (
 )
 
 func TestLetStatements(t *testing.T) {
-	input := `
-let x = 5;
-let y = 10;
-let foobar = 838383;
-`
-
-	l := lexer.New(input)
-	p := New(l)
-
-	program := p.ParseProgram()
-	checkParserErrors(t, p.Errors())
-	if !testProgram(t, program, 3) {
-		return
-	}
-
 	tests := []struct {
-		expected string
+		input      string
+		identifier string
+		value      interface{}
 	}{
-		{"x"},
-		{"y"},
-		{"foobar"},
+		{"let x = 5;", "x", 5},
+		{"let y = true;", "y", true},
+		{"let x = 5;", "x", 5},
 	}
 
-	for i, tt := range tests {
-		stmt := program.Statements[i]
-		if !testLetStatement(t, stmt, tt.expected) {
+	for _, tt := range tests {
+		l := lexer.New(tt.input)
+		p := New(l)
+		program := p.ParseProgram()
+		checkParserErrors(t, p.Errors())
+		if !testProgram(t, program, 1) {
+			return
+		}
+
+		stmt := program.Statements[0]
+		if !testLetStatement(t, stmt, tt.identifier) {
+			return
+		}
+
+		if !testLiteralExpression(t, stmt.(*ast.LetStatement).Value, tt.value) {
 			return
 		}
 	}
 }
 
 func TestReturnStatements(t *testing.T) {
-	input := `
-return 5;
-return 10;
-return 993322;
-`
-
-	l := lexer.New(input)
-	p := New(l)
-
-	program := p.ParseProgram()
-	checkParserErrors(t, p.Errors())
-	if !testProgram(t, program, 3) {
-		return
+	tests := []struct {
+		input string
+		value interface{}
+	}{
+		{"return 5;", 5},
+		{"return 10;", 10},
+		{"return 993322;", 993322},
 	}
 
-	for _, stmt := range program.Statements {
+	for _, tt := range tests {
+		l := lexer.New(tt.input)
+		p := New(l)
+		program := p.ParseProgram()
+		checkParserErrors(t, p.Errors())
+		if !testProgram(t, program, 1) {
+			return
+		}
+
+		stmt := program.Statements[0]
 		if !testReturnStatement(t, stmt) {
+			return
+		}
+
+		if !testLiteralExpression(t, stmt.(*ast.ReturnStatement).ReturnValue, tt.value) {
 			return
 		}
 	}
 }
 
 func TestIdentifierExpression(t *testing.T) {
-	input := "foobar;"
-
 	tests := []struct {
 		input string
 		value string
@@ -73,9 +77,8 @@ func TestIdentifierExpression(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		l := lexer.New(input)
+		l := lexer.New(tt.input)
 		p := New(l)
-
 		program := p.ParseProgram()
 		checkParserErrors(t, p.Errors())
 		if !testProgram(t, program, 1) {
@@ -115,7 +118,7 @@ func TestIntegerLiteralExpression(t *testing.T) {
 			t.Errorf("program.Statements[0] is not *ast.ExpressionStatement. got=%T", program.Statements[0])
 		}
 
-		if !testLiteralExpression(t, stmt.Expression, tt.value) {
+		if !testIntegerLiteral(t, stmt.Expression, tt.value) {
 			return
 		}
 	}
