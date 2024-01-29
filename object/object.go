@@ -7,7 +7,7 @@ type Type string
 const (
 	INTEGER = "INTEGER"
 	BOOLEAN = "BOOLEAN"
-	NULLOBJ = "NULL"
+	NULL    = "NULL"
 )
 
 type Object interface {
@@ -37,12 +37,12 @@ func (b *Boolean) Inspect() string {
 	return fmt.Sprintf("%t", b.Value)
 }
 
-type NULL struct{}
+type Null struct{}
 
-func (n *NULL) Type() Type {
-	return NULLOBJ
+func (n *Null) Type() Type {
+	return NULL
 }
 
-func (n *NULL) Inspect() string {
+func (n *Null) Inspect() string {
 	return "null"
 }

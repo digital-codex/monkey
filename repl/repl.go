@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"monkey/evaluator"
 	"monkey/lexer"
 	"monkey/parser"
 	"os/user"
@@ -53,8 +54,11 @@ func Start(in io.Reader, out io.Writer, current *user.User) {
 		if len(p.Errors()) != 0 {
 			printParseErrors(out, p.Errors())
 			continue
-		} else {
-			_, err := fmt.Fprintf(out, "%s\n", program.String())
+		}
+
+		evaluated := evaluator.Eval(program)
+		if evaluated != nil {
+			_, err := fmt.Fprintf(out, "%s\n", evaluated.Inspect())
 			if err != nil {
 				log.Fatal(err)
 			}
