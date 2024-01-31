@@ -16,6 +16,7 @@ const (
 	RETURN_VALUE = "RETURN_VALUE"
 	ERROR        = "ERROR"
 	FUNCTION     = "FUNCTION"
+	STRING       = "STRING"
 )
 
 type Object interface {
@@ -50,7 +51,6 @@ type Null struct{}
 func (n *Null) Type() Type {
 	return NULL
 }
-
 func (n *Null) Inspect() string {
 	return "null"
 }
@@ -62,7 +62,6 @@ type ReturnValue struct {
 func (rv *ReturnValue) Type() Type {
 	return RETURN_VALUE
 }
-
 func (rv *ReturnValue) Inspect() string {
 	return rv.Value.Inspect()
 }
@@ -74,7 +73,6 @@ type Error struct {
 func (e *Error) Type() Type {
 	return ERROR
 }
-
 func (e *Error) Inspect() string {
 	return "Error: " + e.Message
 }
@@ -88,7 +86,6 @@ type Function struct {
 func (f *Function) Type() Type {
 	return FUNCTION
 }
-
 func (f *Function) Inspect() string {
 	var out bytes.Buffer
 
@@ -105,4 +102,15 @@ func (f *Function) Inspect() string {
 	out.WriteString("\n}")
 
 	return out.String()
+}
+
+type String struct {
+	Value string
+}
+
+func (s *String) Type() Type {
+	return STRING
+}
+func (s *String) Inspect() string {
+	return s.Value
 }
