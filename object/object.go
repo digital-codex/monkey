@@ -3,6 +3,8 @@ package object
 import (
 	"bytes"
 	"fmt"
+	"hash/fnv"
+	"math/rand"
 	"monkey/ast"
 	"strings"
 )
@@ -19,6 +21,8 @@ const (
 	STRING       = "STRING"
 	BUILTIN      = "BUILTIN"
 	ARRAY        = "ARRAY"
+
+	HASH = "HASH"
 )
 
 type Object interface {
@@ -147,6 +151,67 @@ func (a *Array) Inspect() string {
 	out.WriteString("[")
 	out.WriteString(strings.Join(elems, ", "))
 	out.WriteString("]")
+
+	return out.String()
+}
+
+type Hashable interface {
+	HashKey() HashKey
+}
+
+type HashKey struct {
+	Type  Type
+	Value uint64
+}
+
+func (i *Integer) HashKey() HashKey {
+	return HashKey{Type: INTEGER, Value: uint64(i.Value)}
+}
+func (b *Boolean) HashKey() HashKey {
+	var value uint64
+
+	if b.Value {
+		value = 1
+	} else {
+		value = 0
+	}
+
+	return HashKey{Type: BOOLEAN, Value: value}
+}
+func (s *String) HashKey() HashKey {
+	h := fnv.New64a()
+	_, err := h.Write([]byte(s.Value))
+	if err != nil {
+		return HashKey{Type: STRING, Value: rand.Uint64()}
+	}
+
+	return HashKey{Type: STRING, Value: h.Sum64()}
+}
+
+type HashPair struct {
+	Key   Object
+	Value Object
+}
+
+type Hash struct {
+	Pairs map[HashKey]HashPair
+}
+
+func (h *Hash) Type() Type {
+	return HASH
+}
+
+func (h *Hash) Inspect() string {
+	var out bytes.Buffer
+
+	var pairs []string
+	for _, pair := range h.Pairs {
+		pairs = append(pairs, pair.Key.Inspect()+":"+pair.Value.Inspect())
+	}
+
+	out.WriteString("{")
+	out.WriteString(strings.Join(pairs, ", "))
+	out.WriteString("}")
 
 	return out.String()
 }
