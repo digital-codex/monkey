@@ -89,7 +89,6 @@ func (l *Lexer) NextToken() token.Token {
 
 func (l *Lexer) readString() string {
 	position := l.position + 1
-	l.readChar()
 	for {
 		l.readChar()
 		if l.ch == '"' || l.ch == 0 {
