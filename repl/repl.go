@@ -7,6 +7,7 @@ import (
 	"log"
 	"monkey/evaluator"
 	"monkey/lexer"
+	"monkey/object"
 	"monkey/parser"
 	"os/user"
 )
@@ -36,6 +37,7 @@ func Start(in io.Reader, out io.Writer, current *user.User) {
 		log.Fatal(err)
 	}
 	scanner := bufio.NewScanner(in)
+	env := object.NewEnvironment()
 
 	for {
 		_, err := fmt.Fprintf(out, PROMPT)
@@ -56,7 +58,7 @@ func Start(in io.Reader, out io.Writer, current *user.User) {
 			continue
 		}
 
-		evaluated := evaluator.Eval(program)
+		evaluated := evaluator.Eval(program, env)
 		if evaluated != nil {
 			_, err := fmt.Fprintf(out, "%s\n", evaluated.Inspect())
 			if err != nil {
