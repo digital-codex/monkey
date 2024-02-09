@@ -22,7 +22,8 @@ const (
 	BUILTIN      = "BUILTIN"
 	ARRAY        = "ARRAY"
 
-	HASH = "HASH"
+	HASH  = "HASH"
+	QUOTE = "QUOTE"
 )
 
 type Object interface {
@@ -214,4 +215,16 @@ func (h *Hash) Inspect() string {
 	out.WriteString("}")
 
 	return out.String()
+}
+
+type Quote struct {
+	Node ast.Node
+}
+
+func (q *Quote) Type() Type {
+	return QUOTE
+}
+
+func (q *Quote) Inspect() string {
+	return "QUOTE(" + q.Node.String() + ")"
 }
