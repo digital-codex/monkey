@@ -30,6 +30,8 @@ if (5 < 10) {
 "foo bar";
 [1, 2];
 {"foo": "bar"};
+
+macro(x, y) { quote(unquote(x) + unquote(y)); };
 `
 
 	tests := []struct {
@@ -123,6 +125,28 @@ if (5 < 10) {
 		{token.STRING, "foo"},
 		{token.COLON, ":"},
 		{token.STRING, "bar"},
+		{token.RBRACE, "}"},
+		{token.SEMICOLON, ";"},
+		{token.MACRO, "macro"},
+		{token.LPAREN, "("},
+		{token.IDENT, "x"},
+		{token.COMMA, ","},
+		{token.IDENT, "y"},
+		{token.RPAREN, ")"},
+		{token.LBRACE, "{"},
+		{token.IDENT, "quote"},
+		{token.LPAREN, "("},
+		{token.IDENT, "unquote"},
+		{token.LPAREN, "("},
+		{token.IDENT, "x"},
+		{token.RPAREN, ")"},
+		{token.PLUS, "+"},
+		{token.IDENT, "unquote"},
+		{token.LPAREN, "("},
+		{token.IDENT, "y"},
+		{token.RPAREN, ")"},
+		{token.RPAREN, ")"},
+		{token.SEMICOLON, ";"},
 		{token.RBRACE, "}"},
 		{token.SEMICOLON, ";"},
 		{token.EOF, ""},
