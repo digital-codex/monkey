@@ -3,12 +3,12 @@ package repl
 import (
 	"bufio"
 	"fmt"
+	"github.com/digital-codex/monkey/evaluator"
+	"github.com/digital-codex/monkey/lexer"
+	"github.com/digital-codex/monkey/object"
+	"github.com/digital-codex/monkey/parser"
 	"io"
 	"log"
-	"monkey/evaluator"
-	"monkey/lexer"
-	"monkey/object"
-	"monkey/parser"
 	"os/user"
 )
 

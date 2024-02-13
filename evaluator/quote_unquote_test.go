@@ -1,7 +1,7 @@
 package evaluator
 
 import (
-	"monkey/object"
+	"github.com/digital-codex/monkey/object"
 	"testing"
 )
 

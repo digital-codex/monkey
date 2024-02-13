@@ -1,10 +1,10 @@
 package evaluator
 
 import (
-	"monkey/ast"
-	"monkey/lexer"
-	"monkey/object"
-	"monkey/parser"
+	"github.com/digital-codex/monkey/ast"
+	"github.com/digital-codex/monkey/lexer"
+	"github.com/digital-codex/monkey/object"
+	"github.com/digital-codex/monkey/parser"
 	"testing"
 )
 

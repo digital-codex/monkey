@@ -1,9 +1,10 @@
 package lexer
 
 import (
+	"github.com/digital-codex/assertions"
+	"github.com/digital-codex/monkey/token"
+	"strconv"
 	"testing"
-
-	"monkey/token"
 )
 
 func TestNextToken(t *testing.T) {
@@ -157,12 +158,7 @@ macro(x, y) { quote(unquote(x) + unquote(y)); };
 	for i, tt := range tests {
 		tok := l.NextToken()
 
-		if tok.Type != tt.expectedType {
-			t.Fatalf("test[%d] - tokentype wrong. expected=%q, got=%q", i, tt.expectedType, tok.Type)
-		}
-
-		if tok.Literal != tt.expectedLiteral {
-			t.Fatalf("test[%d] - literal wrong. expected=%q, got=%q", i, tt.expectedLiteral, tok.Literal)
-		}
+		assertions.AssertStructEquals(t, tok.Type, tt.expectedType, "test["+strconv.Itoa(i)+"] - type wrong")
+		assertions.AssertStringEquals(t, tok.Literal, tt.expectedLiteral, "test["+strconv.Itoa(i)+"] - literal wrong")
 	}
 }

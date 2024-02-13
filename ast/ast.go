@@ -2,7 +2,7 @@ package ast
 
 import (
 	"bytes"
-	"monkey/token"
+	"github.com/digital-codex/monkey/token"
 	"strings"
 )
 

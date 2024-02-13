@@ -1,8 +1,8 @@
 package evaluator
 
 import (
-	"monkey/ast"
-	"monkey/object"
+	"github.com/digital-codex/monkey/ast"
+	"github.com/digital-codex/monkey/object"
 )
 
 func DefineMacros(program *ast.Program, env *object.Environment) {

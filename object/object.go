@@ -3,9 +3,9 @@ package object
 import (
 	"bytes"
 	"fmt"
+	"github.com/digital-codex/monkey/ast"
 	"hash/fnv"
 	"math/rand"
-	"monkey/ast"
 	"strings"
 )
 

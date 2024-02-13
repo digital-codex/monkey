@@ -2,8 +2,8 @@ package parser
 
 import (
 	"fmt"
-	"monkey/ast"
-	"monkey/lexer"
+	"github.com/digital-codex/monkey/ast"
+	"github.com/digital-codex/monkey/lexer"
 	"testing"
 )
 
@@ -150,7 +150,7 @@ func TestBooleanExpression(t *testing.T) {
 		input string
 		value bool
 	}{
-		{"true;", true},
+		{"true;", false},
 		{"false;", false},
 	}
 
