@@ -8,157 +8,245 @@ import (
 )
 
 func TestNextToken(t *testing.T) {
-	input := `let five = 5;
-let ten = 10;
-
-let add = fn(x, y) {
-	x + y;
-};
-
-let result = add(five, ten);
-!-/*5;
-5 < 10 > 5;
-
-if (5 < 10) {
-	return true;
-} else {
-	return false;
-}
-
-10 == 10;
-10 != 9;
-"foobar";
-"foo bar";
-[1, 2];
-{"foo": "bar"};
-
-macro(x, y) { quote(unquote(x) + unquote(y)); };
-`
-
 	tests := []struct {
-		expectedType    token.Type
-		expectedLiteral string
+		input    string
+		expected []token.Token
 	}{
-		{token.LET, "let"},
-		{token.IDENT, "five"},
-		{token.ASSIGN, "="},
-		{token.INT, "5"},
-		{token.SEMICOLON, ";"},
-		{token.LET, "let"},
-		{token.IDENT, "ten"},
-		{token.ASSIGN, "="},
-		{token.INT, "10"},
-		{token.SEMICOLON, ";"},
-		{token.LET, "let"},
-		{token.IDENT, "add"},
-		{token.ASSIGN, "="},
-		{token.FUNCTION, "fn"},
-		{token.LPAREN, "("},
-		{token.IDENT, "x"},
-		{token.COMMA, ","},
-		{token.IDENT, "y"},
-		{token.RPAREN, ")"},
-		{token.LBRACE, "{"},
-		{token.IDENT, "x"},
-		{token.PLUS, "+"},
-		{token.IDENT, "y"},
-		{token.SEMICOLON, ";"},
-		{token.RBRACE, "}"},
-		{token.SEMICOLON, ";"},
-		{token.LET, "let"},
-		{token.IDENT, "result"},
-		{token.ASSIGN, "="},
-		{token.IDENT, "add"},
-		{token.LPAREN, "("},
-		{token.IDENT, "five"},
-		{token.COMMA, ","},
-		{token.IDENT, "ten"},
-		{token.RPAREN, ")"},
-		{token.SEMICOLON, ";"},
-		{token.BANG, "!"},
-		{token.MINUS, "-"},
-		{token.SLASH, "/"},
-		{token.ASTERISK, "*"},
-		{token.INT, "5"},
-		{token.SEMICOLON, ";"},
-		{token.INT, "5"},
-		{token.LT, "<"},
-		{token.INT, "10"},
-		{token.GT, ">"},
-		{token.INT, "5"},
-		{token.SEMICOLON, ";"},
-		{token.IF, "if"},
-		{token.LPAREN, "("},
-		{token.INT, "5"},
-		{token.LT, "<"},
-		{token.INT, "10"},
-		{token.RPAREN, ")"},
-		{token.LBRACE, "{"},
-		{token.RETURN, "return"},
-		{token.TRUE, "true"},
-		{token.SEMICOLON, ";"},
-		{token.RBRACE, "}"},
-		{token.ELSE, "else"},
-		{token.LBRACE, "{"},
-		{token.RETURN, "return"},
-		{token.FALSE, "false"},
-		{token.SEMICOLON, ";"},
-		{token.RBRACE, "}"},
-		{token.INT, "10"},
-		{token.EQ, "=="},
-		{token.INT, "10"},
-		{token.SEMICOLON, ";"},
-		{token.INT, "10"},
-		{token.NEQ, "!="},
-		{token.INT, "9"},
-		{token.SEMICOLON, ";"},
-		{token.STRING, "foobar"},
-		{token.SEMICOLON, ";"},
-		{token.STRING, "foo bar"},
-		{token.SEMICOLON, ";"},
-		{token.LBRACKET, "["},
-		{token.INT, "1"},
-		{token.COMMA, ","},
-		{token.INT, "2"},
-		{token.RBRACKET, "]"},
-		{token.SEMICOLON, ";"},
-		{token.LBRACE, "{"},
-		{token.STRING, "foo"},
-		{token.COLON, ":"},
-		{token.STRING, "bar"},
-		{token.RBRACE, "}"},
-		{token.SEMICOLON, ";"},
-		{token.MACRO, "macro"},
-		{token.LPAREN, "("},
-		{token.IDENT, "x"},
-		{token.COMMA, ","},
-		{token.IDENT, "y"},
-		{token.RPAREN, ")"},
-		{token.LBRACE, "{"},
-		{token.IDENT, "quote"},
-		{token.LPAREN, "("},
-		{token.IDENT, "unquote"},
-		{token.LPAREN, "("},
-		{token.IDENT, "x"},
-		{token.RPAREN, ")"},
-		{token.PLUS, "+"},
-		{token.IDENT, "unquote"},
-		{token.LPAREN, "("},
-		{token.IDENT, "y"},
-		{token.RPAREN, ")"},
-		{token.RPAREN, ")"},
-		{token.SEMICOLON, ";"},
-		{token.RBRACE, "}"},
-		{token.SEMICOLON, ";"},
-		{token.EOF, ""},
+		{
+			`let five = 5;`,
+			[]token.Token{
+				{Type: token.LET, Literal: "let"},
+				{Type: token.IDENT, Literal: "five"},
+				{Type: token.ASSIGN, Literal: "="},
+				{Type: token.INT, Literal: "5"},
+				{Type: token.SEMICOLON, Literal: ";"},
+				{Type: token.EOF, Literal: ""},
+			},
+		},
+		{
+			`let ten = 10;`,
+			[]token.Token{
+				{Type: token.LET, Literal: "let"},
+				{Type: token.IDENT, Literal: "ten"},
+				{Type: token.ASSIGN, Literal: "="},
+				{Type: token.INT, Literal: "10"},
+				{Type: token.SEMICOLON, Literal: ";"},
+				{Type: token.EOF, Literal: ""},
+			},
+		},
+		{
+			`let add = fn(x, y) { x + y; }`,
+			[]token.Token{
+				{Type: token.LET, Literal: "let"},
+				{Type: token.IDENT, Literal: "add"},
+				{Type: token.ASSIGN, Literal: "="},
+				{Type: token.FUNCTION, Literal: "fn"},
+				{Type: token.LPAREN, Literal: "("},
+				{Type: token.IDENT, Literal: "x"},
+				{Type: token.COMMA, Literal: ","},
+				{Type: token.IDENT, Literal: "y"},
+				{Type: token.RPAREN, Literal: ")"},
+				{Type: token.LBRACE, Literal: "{"},
+				{Type: token.IDENT, Literal: "x"},
+				{Type: token.PLUS, Literal: "+"},
+				{Type: token.IDENT, Literal: "y"},
+				{Type: token.SEMICOLON, Literal: ";"},
+				{Type: token.RBRACE, Literal: "}"},
+				{Type: token.EOF, Literal: ""},
+			},
+		},
+		{
+			`let result = add(five, ten);`,
+			[]token.Token{
+				{Type: token.LET, Literal: "let"},
+				{Type: token.IDENT, Literal: "result"},
+				{Type: token.ASSIGN, Literal: "="},
+				{Type: token.IDENT, Literal: "add"},
+				{Type: token.LPAREN, Literal: "("},
+				{Type: token.IDENT, Literal: "five"},
+				{Type: token.COMMA, Literal: ","},
+				{Type: token.IDENT, Literal: "ten"},
+				{Type: token.RPAREN, Literal: ")"},
+				{Type: token.SEMICOLON, Literal: ";"},
+				{Type: token.EOF, Literal: ""},
+			},
+		},
+		{
+			`let zero = 5 - 5 / 5 * 5;`,
+			[]token.Token{
+				{Type: token.LET, Literal: "let"},
+				{Type: token.IDENT, Literal: "zero"},
+				{Type: token.ASSIGN, Literal: "="},
+				{Type: token.INT, Literal: "5"},
+				{Type: token.MINUS, Literal: "-"},
+				{Type: token.INT, Literal: "5"},
+				{Type: token.SLASH, Literal: "/"},
+				{Type: token.INT, Literal: "5"},
+				{Type: token.ASTERISK, Literal: "*"},
+				{Type: token.INT, Literal: "5"},
+				{Type: token.SEMICOLON, Literal: ";"},
+				{Type: token.EOF, Literal: ""},
+			},
+		},
+		{
+			`let less = 5 < 10; let greater = 10 > 5;`,
+			[]token.Token{
+				{Type: token.LET, Literal: "let"},
+				{Type: token.IDENT, Literal: "less"},
+				{Type: token.ASSIGN, Literal: "="},
+				{Type: token.INT, Literal: "5"},
+				{Type: token.LT, Literal: "<"},
+				{Type: token.INT, Literal: "10"},
+				{Type: token.SEMICOLON, Literal: ";"},
+				{Type: token.LET, Literal: "let"},
+				{Type: token.IDENT, Literal: "greater"},
+				{Type: token.ASSIGN, Literal: "="},
+				{Type: token.INT, Literal: "10"},
+				{Type: token.GT, Literal: ">"},
+				{Type: token.INT, Literal: "5"},
+				{Type: token.SEMICOLON, Literal: ";"},
+				{Type: token.EOF, Literal: ""},
+			},
+		},
+		{
+			`let bool = if (!(5 < 10)) { return true; } else { return false; }`,
+			[]token.Token{
+				{Type: token.LET, Literal: "let"},
+				{Type: token.IDENT, Literal: "bool"},
+				{Type: token.ASSIGN, Literal: "="},
+				{Type: token.IF, Literal: "if"},
+				{Type: token.LPAREN, Literal: "("},
+				{Type: token.BANG, Literal: "!"},
+				{Type: token.LPAREN, Literal: "("},
+				{Type: token.INT, Literal: "5"},
+				{Type: token.LT, Literal: "<"},
+				{Type: token.INT, Literal: "10"},
+				{Type: token.RPAREN, Literal: ")"},
+				{Type: token.RPAREN, Literal: ")"},
+				{Type: token.LBRACE, Literal: "{"},
+				{Type: token.RETURN, Literal: "return"},
+				{Type: token.TRUE, Literal: "true"},
+				{Type: token.SEMICOLON, Literal: ";"},
+				{Type: token.RBRACE, Literal: "}"},
+				{Type: token.ELSE, Literal: "else"},
+				{Type: token.LBRACE, Literal: "{"},
+				{Type: token.RETURN, Literal: "return"},
+				{Type: token.FALSE, Literal: "false"},
+				{Type: token.SEMICOLON, Literal: ";"},
+				{Type: token.RBRACE, Literal: "}"},
+				{Type: token.EOF, Literal: ""},
+			},
+		},
+		{
+			`let equal = 10 == 10;`,
+			[]token.Token{
+				{Type: token.LET, Literal: "let"},
+				{Type: token.IDENT, Literal: "equal"},
+				{Type: token.ASSIGN, Literal: "="},
+				{Type: token.INT, Literal: "10"},
+				{Type: token.EQ, Literal: "=="},
+				{Type: token.INT, Literal: "10"},
+				{Type: token.SEMICOLON, Literal: ";"},
+				{Type: token.EOF, Literal: ""},
+			},
+		},
+		{
+			`let not_equal = 10 != 5;`,
+			[]token.Token{
+				{Type: token.LET, Literal: "let"},
+				{Type: token.IDENT, Literal: "not_equal"},
+				{Type: token.ASSIGN, Literal: "="},
+				{Type: token.INT, Literal: "10"},
+				{Type: token.NEQ, Literal: "!="},
+				{Type: token.INT, Literal: "5"},
+				{Type: token.SEMICOLON, Literal: ";"},
+				{Type: token.EOF, Literal: ""},
+			},
+		},
+		{
+			`let foobar = "foobar"; let foo_bar = "foo bar";`,
+			[]token.Token{
+				{Type: token.LET, Literal: "let"},
+				{Type: token.IDENT, Literal: "foobar"},
+				{Type: token.ASSIGN, Literal: "="},
+				{Type: token.STRING, Literal: "foobar"},
+				{Type: token.SEMICOLON, Literal: ";"},
+				{Type: token.LET, Literal: "let"},
+				{Type: token.IDENT, Literal: "foo_bar"},
+				{Type: token.ASSIGN, Literal: "="},
+				{Type: token.STRING, Literal: "foo bar"},
+				{Type: token.SEMICOLON, Literal: ";"},
+				{Type: token.EOF, Literal: ""},
+			},
+		},
+		{
+			`let array = [5, 10];`,
+			[]token.Token{
+				{Type: token.LET, Literal: "let"},
+				{Type: token.IDENT, Literal: "array"},
+				{Type: token.ASSIGN, Literal: "="},
+				{Type: token.LBRACKET, Literal: "["},
+				{Type: token.INT, Literal: "5"},
+				{Type: token.COMMA, Literal: ","},
+				{Type: token.INT, Literal: "10"},
+				{Type: token.RBRACKET, Literal: "]"},
+				{Type: token.SEMICOLON, Literal: ";"},
+				{Type: token.EOF, Literal: ""},
+			},
+		},
+		{
+			`let map = {"foo": "bar"};`,
+			[]token.Token{
+				{Type: token.LET, Literal: "let"},
+				{Type: token.IDENT, Literal: "map"},
+				{Type: token.ASSIGN, Literal: "="},
+				{Type: token.LBRACE, Literal: "{"},
+				{Type: token.STRING, Literal: "foo"},
+				{Type: token.COLON, Literal: ":"},
+				{Type: token.STRING, Literal: "bar"},
+				{Type: token.RBRACE, Literal: "}"},
+				{Type: token.SEMICOLON, Literal: ";"},
+				{Type: token.EOF, Literal: ""},
+			},
+		},
+		{
+			`let sub = macro(x, y) { quote(unquote(x) - unquote(y)); }`,
+			[]token.Token{
+				{Type: token.LET, Literal: "let"},
+				{Type: token.IDENT, Literal: "sub"},
+				{Type: token.ASSIGN, Literal: "="},
+				{Type: token.MACRO, Literal: "macro"},
+				{Type: token.LPAREN, Literal: "("},
+				{Type: token.IDENT, Literal: "x"},
+				{Type: token.COMMA, Literal: ","},
+				{Type: token.IDENT, Literal: "y"},
+				{Type: token.RPAREN, Literal: ")"},
+				{Type: token.LBRACE, Literal: "{"},
+				{Type: token.IDENT, Literal: "quote"},
+				{Type: token.LPAREN, Literal: "("},
+				{Type: token.IDENT, Literal: "unquote"},
+				{Type: token.LPAREN, Literal: "("},
+				{Type: token.IDENT, Literal: "x"},
+				{Type: token.RPAREN, Literal: ")"},
+				{Type: token.MINUS, Literal: "-"},
+				{Type: token.IDENT, Literal: "unquote"},
+				{Type: token.LPAREN, Literal: "("},
+				{Type: token.IDENT, Literal: "y"},
+				{Type: token.RPAREN, Literal: ")"},
+				{Type: token.RPAREN, Literal: ")"},
+				{Type: token.SEMICOLON, Literal: ";"},
+				{Type: token.RBRACE, Literal: "}"},
+				{Type: token.EOF, Literal: ""},
+			},
+		},
 	}
 
-	l := New(input)
-
-	for i, tt := range tests {
-		tok := l.NextToken()
-
-		assertions.AssertStructEquals(t, tok.Type, tt.expectedType, "test["+strconv.Itoa(i)+"] - type wrong")
-		assertions.AssertStringEquals(t, tok.Literal, tt.expectedLiteral, "test["+strconv.Itoa(i)+"] - literal wrong")
+	for i, test := range tests {
+		l := New(test.input)
+		for _, expected := range test.expected {
+			actual := l.NextToken()
+			assertions.AssertStructEquals(t, expected.Type, actual.Type, "test["+strconv.Itoa(i)+"] - type wrong")
+			assertions.AssertStringEquals(t, expected.Literal, actual.Literal, "test["+strconv.Itoa(i)+"] - literal wrong")
+		}
 	}
 }
