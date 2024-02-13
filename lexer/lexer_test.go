@@ -245,7 +245,7 @@ func TestNextToken(t *testing.T) {
 		l := New(test.input)
 		for _, expected := range test.expected {
 			actual := l.NextToken()
-			assertions.AssertStructEquals(t, expected.Type, actual.Type, "test["+strconv.Itoa(i)+"] - type wrong")
+			assertions.AssertDeepEquals(t, expected.Type, actual.Type, "test["+strconv.Itoa(i)+"] - type wrong")
 			assertions.AssertStringEquals(t, expected.Literal, actual.Literal, "test["+strconv.Itoa(i)+"] - literal wrong")
 		}
 	}

@@ -1,6 +1,7 @@
 package ast
 
 import (
+	"github.com/digital-codex/assertions"
 	"github.com/digital-codex/monkey/token"
 	"testing"
 )
@@ -11,18 +12,16 @@ func TestString(t *testing.T) {
 			&LetStatement{
 				Token: token.Token{Type: token.LET, Literal: "let"},
 				Name: &Identifier{
-					Token: token.Token{Type: token.IDENT, Literal: "myVar"},
-					Value: "myVar",
+					Token: token.Token{Type: token.IDENT, Literal: "assign"},
+					Value: "assign",
 				},
 				Value: &Identifier{
-					Token: token.Token{Type: token.IDENT, Literal: "anotherVar"},
-					Value: "anotherVar",
+					Token: token.Token{Type: token.IDENT, Literal: "value"},
+					Value: "value",
 				},
 			},
 		},
 	}
 
-	if program.String() != "let myVar = anotherVar;" {
-		t.Errorf("program.String() wrong. got=%q", program.String())
-	}
+	assertions.AssertStringEquals(t, "let assign = value;", program.String(), "program.String() wrong")
 }
