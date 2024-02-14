@@ -35,10 +35,10 @@ const (
 	 */
 	COMMA
 	COLON
-	SEMICOLON
+	SCOLON
 
-	LPARENTHESIS
-	RPARENTHESIS
+	LPAREN
+	RPAREN
 	LBRACE
 	RBRACE
 	LBRACKET
@@ -87,16 +87,16 @@ var literals = [...]string{
 	/*
 	 * Delimiters
 	 */
-	COMMA:     ",",
-	COLON:     ":",
-	SEMICOLON: ";",
+	COMMA:  ",",
+	COLON:  ":",
+	SCOLON: ";",
 
-	LPARENTHESIS: "(",
-	RPARENTHESIS: ")",
-	LBRACE:       "{",
-	RBRACE:       "}",
-	LBRACKET:     "[",
-	RBRACKET:     "]",
+	LPAREN:   "(",
+	RPAREN:   ")",
+	LBRACE:   "{",
+	RBRACE:   "}",
+	LBRACKET: "[",
+	RBRACKET: "]",
 
 	/*
 	 * Identifiers + literals

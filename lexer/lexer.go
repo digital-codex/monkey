@@ -4,6 +4,10 @@ import (
 	"github.com/digital-codex/monkey/token"
 )
 
+/*****************************************************************************
+ *                                  TYPES                                    *
+ *****************************************************************************/
+
 type Predicate func() bool
 
 type Lexer struct {
@@ -56,11 +60,11 @@ func (l *Lexer) Next() token.Token {
 		case ':':
 			return l.emit(token.COLON)
 		case ';':
-			return l.emit(token.SEMICOLON)
+			return l.emit(token.SCOLON)
 		case '(':
-			return l.emit(token.LPARENTHESIS)
+			return l.emit(token.LPAREN)
 		case ')':
-			return l.emit(token.RPARENTHESIS)
+			return l.emit(token.RPAREN)
 		case '{':
 			return l.emit(token.LBRACE)
 		case '}':
@@ -93,6 +97,10 @@ func (l *Lexer) Next() token.Token {
  *                             PRIVATE FUNCTIONS                             *
  *****************************************************************************/
 
+func (l *Lexer) whitespace() bool {
+	return isWhiteSpace(l.peek(0))
+}
+
 func (l *Lexer) string() string {
 	// consume front double-quote
 	l.consume()
@@ -112,10 +120,6 @@ func (l *Lexer) ident() bool {
 
 func (l *Lexer) number() bool {
 	return isDigit(l.peek(0))
-}
-
-func (l *Lexer) whitespace() bool {
-	return isWhiteSpace(l.peek(0))
 }
 
 func (l *Lexer) skip(condition Predicate) {
@@ -166,11 +170,11 @@ func (l *Lexer) emit(tokenType token.TokenType) token.Token {
 
 func (l *Lexer) emitWithLiteral(tokenType token.TokenType, literal string) token.Token {
 	return token.Token{
-		Type:    tokenType,
-		Start:   l.start,
-		Length:  l.current - l.start,
-		Line:    l.line,
-		Literal: literal,
+		tokenType,
+		l.start,
+		l.current - l.start,
+		l.line,
+		literal,
 	}
 }
 
