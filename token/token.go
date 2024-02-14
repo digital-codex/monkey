@@ -1,67 +1,138 @@
 package token
 
-type Type string
+import "strconv"
+
+type TokenType int
 
 type Token struct {
-	Type    Type
+	Type    TokenType
+	Start   int
+	Length  int
+	Line    int
 	Literal string
 }
 
 const (
-	ILLEGAL = "ILLEGAL"
-	EOF     = "EOF"
-
-	/*
-	 * Identifiers + literals
-	 */
-	IDENT  = "IDENT"
-	INT    = "INT"
-	STRING = "STRING"
+	EOF = iota
 
 	/*
 	 * Operators
 	 */
-	ASSIGN   = "="
-	PLUS     = "+"
-	MINUS    = "-"
-	BANG     = "!"
-	ASTERISK = "*"
-	SLASH    = "/"
+	ASSIGN
+	PLUS
+	MINUS
+	BANG
+	ASTERISK
+	SLASH
 
-	LT  = "<"
-	GT  = ">"
-	EQ  = "=="
-	NEQ = "!="
+	LT
+	GT
+	EQ
+	NEQ
 
 	/*
 	 * Delimiters
 	 */
-	COMMA     = ","
-	COLON     = ":"
-	SEMICOLON = ";"
+	COMMA
+	COLON
+	SEMICOLON
 
-	LPAREN   = "("
-	RPAREN   = ")"
-	LBRACE   = "{"
-	RBRACE   = "}"
-	LBRACKET = "["
-	RBRACKET = "]"
+	LPARENTHESIS
+	RPARENTHESIS
+	LBRACE
+	RBRACE
+	LBRACKET
+	RBRACKET
+
+	/*
+	 * Identifiers + literals
+	 */
+	IDENT
+	NUMBER
+	STRING
 
 	/*
 	 * Keywords
 	 */
-	FUNCTION = "FUNCTION"
-	LET      = "LET"
-	TRUE     = "TRUE"
-	FALSE    = "FALSE"
-	IF       = "IF"
-	ELSE     = "ELSE"
-	RETURN   = "RETURN"
-	MACRO    = "MACRO"
+	FN
+	LET
+	TRUE
+	FALSE
+	IF
+	ELSE
+	RETURN
+	MACRO
+
+	ILLEGAL
 )
 
-var keywords = map[string]Type{
-	"fn":     FUNCTION,
+var literals = [...]string{
+	EOF: "",
+
+	/*
+	 * Operators
+	 */
+	ASSIGN:   "=",
+	PLUS:     "+",
+	MINUS:    "-",
+	BANG:     "!",
+	ASTERISK: "*",
+	SLASH:    "/",
+
+	LT:  "<",
+	GT:  ">",
+	EQ:  "==",
+	NEQ: "!=",
+
+	/*
+	 * Delimiters
+	 */
+	COMMA:     ",",
+	COLON:     ":",
+	SEMICOLON: ";",
+
+	LPARENTHESIS: "(",
+	RPARENTHESIS: ")",
+	LBRACE:       "{",
+	RBRACE:       "}",
+	LBRACKET:     "[",
+	RBRACKET:     "]",
+
+	/*
+	 * Identifiers + literals
+	 */
+	IDENT:  "IDENT",
+	NUMBER: "NUMBER",
+	STRING: "STRING",
+
+	/*
+	 * Keywords
+	 */
+	FN:     "fn",
+	LET:    "let",
+	TRUE:   "true",
+	FALSE:  "false",
+	IF:     "if",
+	ELSE:   "else",
+	RETURN: "return",
+	MACRO:  "macro",
+
+	ILLEGAL: "ILLEGAL",
+}
+
+func (tt TokenType) String() string {
+	s := ""
+	if 0 <= tt && tt < TokenType(len(literals)) {
+		s = literals[tt]
+	}
+	if tt != 0 && s == "" {
+		s = "TokenType(" + strconv.Itoa(int(tt)) + ")"
+	}
+	return s
+}
+
+var keywords = map[string]TokenType{
+	"fn":     FN,
 	"let":    LET,
 	"true":   TRUE,
 	"false":  FALSE,
@@ -71,8 +142,8 @@ var keywords = map[string]Type{
 	"macro":  MACRO,
 }
 
-func LookupIdent(ident string) Type {
-	if tok, ok := keywords[ident]; ok {
+func LookupIdent(literal string) TokenType {
+	if tok, ok := keywords[literal]; ok {
 		return tok
 	}
 	return IDENT

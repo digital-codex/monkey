@@ -96,7 +96,7 @@ type FunctionLiteral struct {
 }
 
 type CallExpression struct {
-	Token    token.Token // The LPAREN token
+	Token    token.Token // The LPARENTHESIS token
 	Function Expression  // Identifier or FunctionLiteral
 	Argument []Expression
 }

@@ -150,7 +150,7 @@ func TestBooleanExpression(t *testing.T) {
 		input string
 		value bool
 	}{
-		{"true;", false},
+		{"true;", true},
 		{"false;", false},
 	}
 
