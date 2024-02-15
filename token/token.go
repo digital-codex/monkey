@@ -130,21 +130,3 @@ func (tt TokenType) String() string {
 	}
 	return s
 }
-
-var keywords = map[string]TokenType{
-	"fn":     FN,
-	"let":    LET,
-	"true":   TRUE,
-	"false":  FALSE,
-	"if":     IF,
-	"else":   ELSE,
-	"return": RETURN,
-	"macro":  MACRO,
-}
-
-func LookupIdent(literal string) TokenType {
-	if tok, ok := keywords[literal]; ok {
-		return tok
-	}
-	return IDENT
-}

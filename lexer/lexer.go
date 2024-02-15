@@ -17,6 +17,17 @@ type Lexer struct {
 	line    int
 }
 
+var keywords = map[string]token.TokenType{
+	"fn":     token.FN,
+	"let":    token.LET,
+	"true":   token.TRUE,
+	"false":  token.FALSE,
+	"if":     token.IF,
+	"else":   token.ELSE,
+	"return": token.RETURN,
+	"macro":  token.MACRO,
+}
+
 /*****************************************************************************
  *                              PUBLIC FUNCTIONS                             *
  *****************************************************************************/
@@ -80,7 +91,7 @@ func (l *Lexer) Next() token.Token {
 		default:
 			if isLetter(ch) {
 				lit := l.read(l.ident)
-				return l.emitWithLiteral(token.LookupIdent(lit), lit)
+				return l.emitWithLiteral(lookupIdent(lit), lit)
 			} else if isDigit(ch) {
 				return l.emitWithLiteral(token.NUMBER, l.read(l.number))
 			} else {
@@ -181,6 +192,13 @@ func (l *Lexer) emitWithLiteral(tokenType token.TokenType, literal string) token
 /*****************************************************************************
  *                                 UTILITIES                                 *
  *****************************************************************************/
+
+func lookupIdent(literal string) token.TokenType {
+	if tok, ok := keywords[literal]; ok {
+		return tok
+	}
+	return token.IDENT
+}
 
 func isWhiteSpace(ch byte) bool {
 	return ch == ' ' || ch == '\t' || ch == '\n' || ch == '\r'
