@@ -316,7 +316,7 @@ func evalHashIndexExpression(obj, index object.Object) object.Object {
 func evalHashLiteral(node *ast.HashLiteral, env *object.Environment) object.Object {
 	pairs := make(map[object.HashKey]object.HashPair)
 
-	for keyNode, valueNode := range node.Paris {
+	for keyNode, valueNode := range node.Pairs {
 		key := Eval(keyNode, env)
 		if isError(key) {
 			return key

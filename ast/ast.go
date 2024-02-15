@@ -119,7 +119,7 @@ type IndexExpression struct {
 
 type HashLiteral struct {
 	Token token.Token // the '{' token
-	Paris map[Expression]Expression
+	Pairs map[Expression]Expression
 }
 
 type MacroLiteral struct {
@@ -381,7 +381,7 @@ func (hl *HashLiteral) String() string {
 	var out bytes.Buffer
 
 	var pairs []string
-	for key, value := range hl.Paris {
+	for key, value := range hl.Pairs {
 		pairs = append(pairs, key.String()+":"+value.String())
 	}
 

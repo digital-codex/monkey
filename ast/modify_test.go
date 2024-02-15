@@ -97,7 +97,7 @@ func TestModify(t *testing.T) {
 	}
 
 	hashLiteral := &HashLiteral{
-		Paris: map[Expression]Expression{
+		Pairs: map[Expression]Expression{
 			one(): one(),
 			one(): one(),
 		},
@@ -105,7 +105,7 @@ func TestModify(t *testing.T) {
 
 	Modify(hashLiteral, turnOneIntoTwo)
 
-	for key, val := range hashLiteral.Paris {
+	for key, val := range hashLiteral.Pairs {
 		key, _ := key.(*IntegerLiteral)
 		if key.Value != 2 {
 			t.Errorf("value is not %d, got=%d", 2, key.Value)
