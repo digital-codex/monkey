@@ -1,23 +1,40 @@
 package lexer
 
 import (
+	"bytes"
+	"errors"
+	"fmt"
 	"github.com/digital-codex/monkey/token"
+	"strings"
 )
 
 /*****************************************************************************
  *                                  TYPES                                    *
  *****************************************************************************/
 
-type Predicate func() bool
+type Predicate func(byte) bool
 
 type Lexer struct {
-	source  string
-	start   int // current position in source (points to current char)
-	current int // current reading position in source (after current char)
-	line    int
+	source string
+
+	start   int // start position in source of Token under examination
+	current int // current position in source of Token under examination
+
+	line int
+
+	errors ErrorHandler
+	valid  bool
 }
 
-var keywords = map[string]token.TokenType{
+type Error string
+type ErrorHandler func(error)
+
+const (
+	UNEXPECTED_CHARACTER Error = "unexpected character"
+	UNTERMINATED_STRING  Error = "unterminated string"
+)
+
+var keywords = map[string]token.Type{
 	"fn":     token.FN,
 	"let":    token.LET,
 	"true":   token.TRUE,
@@ -32,25 +49,25 @@ var keywords = map[string]token.TokenType{
  *                              PUBLIC FUNCTIONS                             *
  *****************************************************************************/
 
-func New(input string) *Lexer {
-	return &Lexer{input, 0, 0, 1}
+func New(input string, errors ErrorHandler) *Lexer {
+	return &Lexer{input, 0, 0, 1, errors, true}
 }
 
 func (l *Lexer) Next() token.Token {
-	for l.current < len(l.source) {
+	for l.current < len(l.source) && l.valid {
 		l.start = l.current
 
 		ch := l.peek(0)
 		switch ch {
 		case '=':
 			if l.match('=') {
-				return l.emit(token.EQ)
+				return l.emit(token.EQUAL_EQUAL)
 			} else {
-				return l.emit(token.ASSIGN)
+				return l.emit(token.EQUAL)
 			}
 		case '!':
 			if l.match('=') {
-				return l.emit(token.NEQ)
+				return l.emit(token.BANG_EQUAL)
 			} else {
 				return l.emit(token.BANG)
 			}
@@ -61,17 +78,17 @@ func (l *Lexer) Next() token.Token {
 		case '/':
 			return l.emit(token.SLASH)
 		case '*':
-			return l.emit(token.ASTERISK)
+			return l.emit(token.STAR)
 		case '<':
-			return l.emit(token.LT)
+			return l.emit(token.LESS)
 		case '>':
-			return l.emit(token.GT)
+			return l.emit(token.MORE)
 		case ',':
 			return l.emit(token.COMMA)
 		case ':':
 			return l.emit(token.COLON)
 		case ';':
-			return l.emit(token.SCOLON)
+			return l.emit(token.SEMICOLON)
 		case '(':
 			return l.emit(token.LPAREN)
 		case ')':
@@ -85,18 +102,16 @@ func (l *Lexer) Next() token.Token {
 		case ']':
 			return l.emit(token.RBRACKET)
 		case '"':
-			return l.emitWithLiteral(token.STRING, l.string())
+			return l.string()
 		case ' ', '\t', '\n', '\r':
-			l.skip(l.whitespace)
+			l.skip(isWhiteSpace)
 		default:
-			if isLetter(ch) {
-				lit := l.read(l.ident)
-				return l.emitWithLiteral(lookupIdent(lit), lit)
+			if isAlpha(ch) {
+				return l.ident()
 			} else if isDigit(ch) {
-				return l.emitWithLiteral(token.NUMBER, l.read(l.number))
+				return l.number()
 			} else {
-				l.consume()
-				return l.emitWithLiteral(token.ILLEGAL, string(ch))
+				return l.unexpected()
 			}
 		}
 	}
@@ -104,43 +119,58 @@ func (l *Lexer) Next() token.Token {
 	return l.emit(token.EOF)
 }
 
+func (l *Lexer) Valid() bool {
+	return l.valid
+}
+
 /*****************************************************************************
  *                             PRIVATE FUNCTIONS                             *
  *****************************************************************************/
 
-func (l *Lexer) whitespace() bool {
-	return isWhiteSpace(l.peek(0))
+func (l *Lexer) ident() token.Token {
+	lit := l.read(isAlpha)
+	var t token.Type = token.IDENT
+	if tt, ok := keywords[lit]; ok {
+		t = tt
+	}
+	return l.emitWithLexeme(t, lit)
 }
 
-func (l *Lexer) string() string {
+func (l *Lexer) number() token.Token {
+	return l.emitWithLexeme(token.NUMBER, l.read(isDigit))
+}
+
+func (l *Lexer) string() token.Token {
 	// consume front double-quote
 	l.consume()
 
-	for ch := l.peek(0); ch != '"' && ch != 0; ch = l.peek(0) {
+	for ch := l.peek(0); ch != '"' && ch != '\n' && ch != 0; ch = l.peek(0) {
 		l.consume()
+	}
+
+	if l.peek(0) != '"' {
+		return l.emitWithLexeme(token.ILLEGAL, l.error(UNTERMINATED_STRING))
 	}
 
 	// consume back double-quote
 	l.consume()
-	return l.source[l.start+1 : l.current-1]
+	return l.emitWithLexeme(token.STRING, l.source[l.start+1:l.current-1])
 }
 
-func (l *Lexer) ident() bool {
-	return isLetter(l.peek(0))
-}
-
-func (l *Lexer) number() bool {
-	return isDigit(l.peek(0))
+func (l *Lexer) unexpected() token.Token {
+	tok := l.emit(token.ILLEGAL)
+	tok.Lexeme = l.error(UNEXPECTED_CHARACTER)
+	return tok
 }
 
 func (l *Lexer) skip(condition Predicate) {
-	for condition() {
+	for condition(l.peek(0)) {
 		l.consume()
 	}
 }
 
 func (l *Lexer) read(condition Predicate) string {
-	for condition() {
+	for condition(l.peek(0)) {
 		l.consume()
 	}
 	return l.source[l.start:l.current]
@@ -156,55 +186,71 @@ func (l *Lexer) peek(n int) byte {
 
 func (l *Lexer) consume() {
 	if l.current < len(l.source) {
-		l.current += 1
+		l.current++
 	}
 }
 
 func (l *Lexer) match(ch byte) bool {
+	res := false
 	if l.peek(1) == ch {
 		l.consume()
-		return true
+		res = true
 	}
-	return false
+	return res
 }
 
-func (l *Lexer) emit(tokenType token.TokenType) token.Token {
+func (l *Lexer) emit(t token.Type) token.Token {
 	l.consume()
 	return token.Token{
-		Type:    tokenType,
-		Start:   l.start,
-		Length:  l.current - l.start,
-		Line:    l.line,
-		Literal: tokenType.String(),
+		Type:   t,
+		Start:  l.start,
+		Length: l.current - l.start,
+		Line:   l.line,
+		Lexeme: t.String(),
 	}
 }
 
-func (l *Lexer) emitWithLiteral(tokenType token.TokenType, literal string) token.Token {
+func (l *Lexer) emitWithLexeme(t token.Type, lexeme string) token.Token {
 	return token.Token{
-		tokenType,
-		l.start,
-		l.current - l.start,
-		l.line,
-		literal,
+		Type:   t,
+		Start:  l.start,
+		Length: l.current - l.start,
+		Line:   l.line,
+		Lexeme: lexeme,
 	}
+}
+
+func (l *Lexer) error(e Error) string {
+	l.valid = false
+
+	var out bytes.Buffer
+
+	out.WriteString(fmt.Sprintf("Error: %s", e))
+	out.WriteString("\n    ")
+	start := l.start
+	for l.source[start] != '\n' && 0 < start {
+		start--
+	}
+	line := fmt.Sprintf("%d | %s\n", l.line, l.source[start:l.current])
+	out.WriteString(line)
+	off := len(line)
+	out.WriteString(strings.Repeat(" ", off+2))
+	out.WriteString("^--- Here")
+
+	l.errors(errors.New(out.String()))
+
+	return string(e)
 }
 
 /*****************************************************************************
  *                                 UTILITIES                                 *
  *****************************************************************************/
 
-func lookupIdent(literal string) token.TokenType {
-	if tok, ok := keywords[literal]; ok {
-		return tok
-	}
-	return token.IDENT
-}
-
 func isWhiteSpace(ch byte) bool {
 	return ch == ' ' || ch == '\t' || ch == '\n' || ch == '\r'
 }
 
-func isLetter(ch byte) bool {
+func isAlpha(ch byte) bool {
 	return ('a' <= ch && ch <= 'z') || ('A' <= ch && ch <= 'Z') || ch == '_'
 }
 

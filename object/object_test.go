@@ -1,6 +1,9 @@
 package object
 
-import "testing"
+import (
+	"fmt"
+	"testing"
+)
 
 func TestStringHashKey(t *testing.T) {
 	hello1 := &String{Value: "Hello World"}
@@ -8,6 +11,10 @@ func TestStringHashKey(t *testing.T) {
 	diff1 := &String{Value: "My name is treyvon"}
 	diff2 := &String{Value: "My name is treyvon"}
 
+	foo := hello1.HashKey()
+	fmt.Printf("%+v", foo)
+	bar := hello2.HashKey()
+	fmt.Printf("%+v", bar)
 	if hello1.HashKey() != hello2.HashKey() {
 		t.Errorf("strings with same content have different hash keys")
 	}

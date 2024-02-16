@@ -35,14 +35,14 @@ func evalUnquoteCalls(quoted ast.Node, env *object.Environment) ast.Node {
 func convertObjectTOASTNode(obj object.Object) ast.Node {
 	switch obj := obj.(type) {
 	case *object.Integer:
-		t := token.Token{Type: token.NUMBER, Literal: fmt.Sprintf("%d", obj.Value)}
+		t := token.Token{Type: token.NUMBER, Lexeme: fmt.Sprintf("%d", obj.Value)}
 		return &ast.IntegerLiteral{Token: t, Value: obj.Value}
 	case *object.Boolean:
 		var t token.Token
 		if obj.Value {
-			t = token.Token{Type: token.TRUE, Literal: "true"}
+			t = token.Token{Type: token.TRUE, Lexeme: "true"}
 		} else {
-			t = token.Token{Type: token.FALSE, Literal: "false"}
+			t = token.Token{Type: token.FALSE, Lexeme: "false"}
 		}
 		return &ast.Boolean{Token: t, Value: obj.Value}
 	case *object.Quote:

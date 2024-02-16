@@ -997,7 +997,7 @@ func testReturnStatement(t *testing.T, i int, stmt ast.Statement, expected ...an
 }
 
 func testExpressionStatement(t *testing.T, i int, stmt ast.Statement, expected ...any) {
-	assertions.AssertTypeOf(t, reflect.TypeOf(ast.ExpressionStatement{}), stmt, "test["+strconv.Itoa(i)+"] - ast.Statement unexpected type")
+	assertions.AssertTypeOf(t, reflect.TypeOf(ast.ExpressionStatement{}), stmt, "test["+strconv.Itoa(i)+"] - stmt unexpected type")
 	if 1 >= len(expected) {
 		t.Fatalf("testExpressionStatement: len(expected) wrong: expected=>1, actual=%d", len(expected))
 	}
@@ -1005,13 +1005,13 @@ func testExpressionStatement(t *testing.T, i int, stmt ast.Statement, expected .
 	if !ok {
 		t.Fatalf("testExpressionStatement: expected[0] unexpected type: expected=string, actual=%T", expected[0])
 	}
-	assertions.AssertStringEquals(t, literal, stmt.TokenLiteral(), "test["+strconv.Itoa(i)+"] - ast.Statement.TokenLiteral() wrong")
+	assertions.AssertStringEquals(t, literal, stmt.TokenLiteral(), "test["+strconv.Itoa(i)+"] - stmt.TokenLiteral() wrong")
 	testExpression(stmt.(*ast.ExpressionStatement).Expression)(t, i, stmt.(*ast.ExpressionStatement).Expression, expected[1:]...)
 }
 
 func testBlockStatement(t *testing.T, i int, stmt ast.Statement, expected ...any) {
 	assertions.AssertNotNull(t, stmt, "test["+strconv.Itoa(i)+"] - stmt is nil")
-	assertions.AssertStringEquals(t, "{", stmt.TokenLiteral(), "test["+strconv.Itoa(i)+"] - ast.Statement.TokenLiteral() wrong")
+	assertions.AssertStringEquals(t, "{", stmt.TokenLiteral(), "test["+strconv.Itoa(i)+"] - stmt.TokenLiteral() wrong")
 	if 0 == len(expected) {
 		t.Fatalf("testBlockStatement: len(expected) wrong: expected=>0, actual=%d", len(expected))
 	}

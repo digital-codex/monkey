@@ -2,14 +2,14 @@ package token
 
 import "strconv"
 
-type TokenType int
+type Type int
 
 type Token struct {
-	Type    TokenType
-	Start   int
-	Length  int
-	Line    int
-	Literal string
+	Type   Type
+	Start  int
+	Length int
+	Line   int
+	Lexeme string
 }
 
 const (
@@ -18,24 +18,24 @@ const (
 	/*
 	 * Operators
 	 */
-	ASSIGN
+	EQUAL
 	PLUS
 	MINUS
 	BANG
-	ASTERISK
+	STAR
 	SLASH
 
-	LT
-	GT
-	EQ
-	NEQ
+	LESS
+	MORE
+	EQUAL_EQUAL
+	BANG_EQUAL
 
 	/*
 	 * Delimiters
 	 */
 	COMMA
 	COLON
-	SCOLON
+	SEMICOLON
 
 	LPAREN
 	RPAREN
@@ -45,7 +45,7 @@ const (
 	RBRACKET
 
 	/*
-	 * Identifiers + literals
+	 * Identifiers + lexemes
 	 */
 	IDENT
 	NUMBER
@@ -66,30 +66,30 @@ const (
 	ILLEGAL
 )
 
-var literals = [...]string{
+var lexemes = [...]string{
 	EOF: "",
 
 	/*
 	 * Operators
 	 */
-	ASSIGN:   "=",
-	PLUS:     "+",
-	MINUS:    "-",
-	BANG:     "!",
-	ASTERISK: "*",
-	SLASH:    "/",
+	EQUAL: "=",
+	PLUS:  "+",
+	MINUS: "-",
+	BANG:  "!",
+	STAR:  "*",
+	SLASH: "/",
 
-	LT:  "<",
-	GT:  ">",
-	EQ:  "==",
-	NEQ: "!=",
+	LESS:        "<",
+	MORE:        ">",
+	EQUAL_EQUAL: "==",
+	BANG_EQUAL:  "!=",
 
 	/*
 	 * Delimiters
 	 */
-	COMMA:  ",",
-	COLON:  ":",
-	SCOLON: ";",
+	COMMA:     ",",
+	COLON:     ":",
+	SEMICOLON: ";",
 
 	LPAREN:   "(",
 	RPAREN:   ")",
@@ -99,7 +99,7 @@ var literals = [...]string{
 	RBRACKET: "]",
 
 	/*
-	 * Identifiers + literals
+	 * Identifiers + lexemes
 	 */
 	IDENT:  "IDENT",
 	NUMBER: "NUMBER",
@@ -120,13 +120,13 @@ var literals = [...]string{
 	ILLEGAL: "ILLEGAL",
 }
 
-func (tt TokenType) String() string {
+func (t Type) String() string {
 	s := ""
-	if 0 <= tt && tt < TokenType(len(literals)) {
-		s = literals[tt]
+	if 0 <= t && t < Type(len(lexemes)) {
+		s = lexemes[t]
 	}
-	if tt != 0 && s == "" {
-		s = "TokenType(" + strconv.Itoa(int(tt)) + ")"
+	if t != 0 && s == "" {
+		s = "Type(" + strconv.Itoa(int(t)) + ")"
 	}
 	return s
 }

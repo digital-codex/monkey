@@ -159,16 +159,16 @@ func (es *ExpressionStatement) statementNode() {}
 func (bs *BlockStatement) statementNode()      {}
 
 func (ls *LetStatement) TokenLiteral() string {
-	return ls.Token.Literal
+	return ls.Token.Lexeme
 }
 func (rs *ReturnStatement) TokenLiteral() string {
-	return rs.Token.Literal
+	return rs.Token.Lexeme
 }
 func (es *ExpressionStatement) TokenLiteral() string {
-	return es.Token.Literal
+	return es.Token.Lexeme
 }
 func (bs *BlockStatement) TokenLiteral() string {
-	return bs.Token.Literal
+	return bs.Token.Lexeme
 }
 
 func (ls *LetStatement) String() string {
@@ -235,50 +235,50 @@ func (hl *HashLiteral) expressionNode()      {}
 func (ml *MacroLiteral) expressionNode()     {}
 
 func (i *Identifier) TokenLiteral() string {
-	return i.Token.Literal
+	return i.Token.Lexeme
 }
 func (il *IntegerLiteral) TokenLiteral() string {
-	return il.Token.Literal
+	return il.Token.Lexeme
 }
 func (pe *PrefixExpression) TokenLiteral() string {
-	return pe.Token.Literal
+	return pe.Token.Lexeme
 }
 func (ie *InfixExpression) TokenLiteral() string {
-	return ie.Token.Literal
+	return ie.Token.Lexeme
 }
 func (b *Boolean) TokenLiteral() string {
-	return b.Token.Literal
+	return b.Token.Lexeme
 }
 func (ie *IfExpression) TokenLiteral() string {
-	return ie.Token.Literal
+	return ie.Token.Lexeme
 }
 func (fl *FunctionLiteral) TokenLiteral() string {
-	return fl.Token.Literal
+	return fl.Token.Lexeme
 }
 func (ce *CallExpression) TokenLiteral() string {
-	return ce.Token.Literal
+	return ce.Token.Lexeme
 }
 func (sl *StringLiteral) TokenLiteral() string {
-	return sl.Token.Literal
+	return sl.Token.Lexeme
 }
 func (al *ArrayLiteral) TokenLiteral() string {
-	return al.Token.Literal
+	return al.Token.Lexeme
 }
 func (ie *IndexExpression) TokenLiteral() string {
-	return ie.Token.Literal
+	return ie.Token.Lexeme
 }
 func (hl *HashLiteral) TokenLiteral() string {
-	return hl.Token.Literal
+	return hl.Token.Lexeme
 }
 func (ml *MacroLiteral) TokenLiteral() string {
-	return ml.Token.Literal
+	return ml.Token.Lexeme
 }
 
 func (i *Identifier) String() string {
 	return i.Value
 }
 func (il *IntegerLiteral) String() string {
-	return il.Token.Literal
+	return il.Token.Lexeme
 }
 func (pe *PrefixExpression) String() string {
 	var out bytes.Buffer
@@ -302,7 +302,7 @@ func (ie *InfixExpression) String() string {
 	return out.String()
 }
 func (b *Boolean) String() string {
-	return b.Token.Literal
+	return b.Token.Lexeme
 }
 func (ie *IfExpression) String() string {
 	var out bytes.Buffer
@@ -350,7 +350,7 @@ func (ce *CallExpression) String() string {
 	return out.String()
 }
 func (sl *StringLiteral) String() string {
-	return sl.Token.Literal
+	return sl.Token.Lexeme
 }
 func (al *ArrayLiteral) String() string {
 	var out bytes.Buffer
