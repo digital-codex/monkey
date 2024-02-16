@@ -33,24 +33,24 @@ type Parser struct {
 const (
 	_ int = iota
 	LOWEST
-	EQUALS  // ==
-	LESS    // > or <
-	SUM     // +
-	PRODUCT // *
-	PREFIX  // -x or !x
-	CALL    // myFunction(x)
-	INDEX   // array[index]
+	EQUALITY   // ==
+	COMPARISON // > or <
+	TERM       // +
+	FACTOR     // *
+	UNARY      // -x or !x
+	CALL       // myFunction(x)
+	INDEX      // array[index]
 )
 
 var precedences = map[token.Type]int{
-	token.EQUAL_EQUAL: EQUALS,
-	token.BANG_EQUAL:  EQUALS,
-	token.LESS:        LESS,
-	token.MORE:        LESS,
-	token.PLUS:        SUM,
-	token.MINUS:       SUM,
-	token.SLASH:       PRODUCT,
-	token.STAR:        PRODUCT,
+	token.EQUAL_EQUAL: EQUALITY,
+	token.BANG_EQUAL:  EQUALITY,
+	token.LESS:        COMPARISON,
+	token.MORE:        COMPARISON,
+	token.PLUS:        TERM,
+	token.MINUS:       TERM,
+	token.SLASH:       FACTOR,
+	token.STAR:        FACTOR,
 	token.LPAREN:      CALL,
 	token.LBRACKET:    INDEX,
 }
@@ -294,7 +294,7 @@ func (p *Parser) parsePrefixExpression() ast.Expression {
 
 	p.nextToken()
 
-	expression.Right = p.parseExpression(PREFIX)
+	expression.Right = p.parseExpression(UNARY)
 
 	return expression
 }
