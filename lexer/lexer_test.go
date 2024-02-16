@@ -245,7 +245,8 @@ func TestNext(t *testing.T) {
 	}
 
 	for i, test := range tests {
-		l := New(test.input, handler)
+		l := New(test.input)
+		l.ErrorHandler = handler
 		for _, expected := range test.expected {
 			actual := l.Next()
 			assertions.AssertEquals(t, expected.Type, actual.Type, "test["+strconv.Itoa(i)+"] - Type wrong")
@@ -283,7 +284,8 @@ func TestErrors(t *testing.T) {
 	}
 
 	for i, test := range tests {
-		l := New(test.input, handler)
+		l := New(test.input)
+		l.ErrorHandler = handler
 		for _, expected := range test.expected {
 			actual := l.Next()
 			assertions.AssertEquals(t, expected.Type, actual.Type, "test["+strconv.Itoa(i)+"] - Type wrong")

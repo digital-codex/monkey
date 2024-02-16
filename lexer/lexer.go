@@ -12,6 +12,14 @@ import (
  *                                  TYPES                                    *
  *****************************************************************************/
 
+type Error string
+type ErrorHandler func(error)
+
+const (
+	UNEXPECTED_CHARACTER Error = "unexpected character"
+	UNTERMINATED_STRING  Error = "unterminated string"
+)
+
 type Predicate func(byte) bool
 
 type Lexer struct {
@@ -22,17 +30,9 @@ type Lexer struct {
 
 	line int
 
-	errors ErrorHandler
-	valid  bool
+	ErrorHandler ErrorHandler
+	errors       bool
 }
-
-type Error string
-type ErrorHandler func(error)
-
-const (
-	UNEXPECTED_CHARACTER Error = "unexpected character"
-	UNTERMINATED_STRING  Error = "unterminated string"
-)
 
 var keywords = map[string]token.Type{
 	"fn":     token.FN,
@@ -49,12 +49,12 @@ var keywords = map[string]token.Type{
  *                              PUBLIC FUNCTIONS                             *
  *****************************************************************************/
 
-func New(input string, errors ErrorHandler) *Lexer {
-	return &Lexer{input, 0, 0, 1, errors, true}
+func New(input string) *Lexer {
+	return &Lexer{input, 0, 0, 1, nil, false}
 }
 
 func (l *Lexer) Next() token.Token {
-	for l.current < len(l.source) && l.valid {
+	for l.current < len(l.source) && !l.errors {
 		l.start = l.current
 
 		ch := l.peek(0)
@@ -119,10 +119,6 @@ func (l *Lexer) Next() token.Token {
 	return l.emit(token.EOF)
 }
 
-func (l *Lexer) Valid() bool {
-	return l.valid
-}
-
 /*****************************************************************************
  *                             PRIVATE FUNCTIONS                             *
  *****************************************************************************/
@@ -164,7 +160,10 @@ func (l *Lexer) unexpected() token.Token {
 }
 
 func (l *Lexer) skip(condition Predicate) {
-	for condition(l.peek(0)) {
+	for ch := l.peek(0); condition(ch); ch = l.peek(0) {
+		if ch == '\n' {
+			l.line++
+		}
 		l.consume()
 	}
 }
@@ -191,12 +190,11 @@ func (l *Lexer) consume() {
 }
 
 func (l *Lexer) match(ch byte) bool {
-	res := false
 	if l.peek(1) == ch {
 		l.consume()
-		res = true
+		return true
 	}
-	return res
+	return false
 }
 
 func (l *Lexer) emit(t token.Type) token.Token {
@@ -221,8 +219,6 @@ func (l *Lexer) emitWithLexeme(t token.Type, lexeme string) token.Token {
 }
 
 func (l *Lexer) error(e Error) string {
-	l.valid = false
-
 	var out bytes.Buffer
 
 	out.WriteString(fmt.Sprintf("Error: %s", e))
@@ -231,13 +227,19 @@ func (l *Lexer) error(e Error) string {
 	for l.source[start] != '\n' && 0 < start {
 		start--
 	}
+	if l.source[start] == '\n' {
+		start++
+	}
 	line := fmt.Sprintf("%d | %s\n", l.line, l.source[start:l.current])
 	out.WriteString(line)
 	off := len(line)
 	out.WriteString(strings.Repeat(" ", off+2))
 	out.WriteString("^--- Here")
 
-	l.errors(errors.New(out.String()))
+	if l.ErrorHandler != nil {
+		l.ErrorHandler(errors.New(out.String()))
+	}
+	l.errors = true
 
 	return string(e)
 }

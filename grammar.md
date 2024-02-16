@@ -96,5 +96,5 @@ STRING      -> "\"" <CHARACTER>* "\"" ;
 IDENTIFIER  -> <ALPHA>+ ;
 ALPHA       -> "a" ... "z" | "A" ... "Z" | "_" ;
 DIGIT       -> "0" ... "9" ;
-CHARACTER   -> "\t" | "\n" | " " ... "~" ;
+CHARACTER   -> "\t" | " " ... "~" ;
 ````
