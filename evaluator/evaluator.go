@@ -118,8 +118,8 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 	switch node := node.(type) {
 	case *ast.Program:
 		return evalProgram(node, env)
-	case *ast.LetStatement:
-		if err, ok := evalLetStatement(node, env); !ok {
+	case *ast.LetDeclaration:
+		if err, ok := evalLetDeclaration(node, env); !ok {
 			return err
 		}
 	case *ast.ReturnStatement:
@@ -180,7 +180,7 @@ func evalProgram(node *ast.Program, env *object.Environment) object.Object {
 	return result
 }
 
-func evalLetStatement(node *ast.LetStatement, env *object.Environment) (object.Object, bool) {
+func evalLetDeclaration(node *ast.LetDeclaration, env *object.Environment) (object.Object, bool) {
 	val := Eval(node.Value, env)
 	if isError(val) {
 		return val, false

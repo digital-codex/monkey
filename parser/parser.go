@@ -112,7 +112,7 @@ func (p *Parser) ParseProgram() *ast.Program {
 	program.Statements = []ast.Statement{}
 
 	for p.current.Type != token.EOF {
-		stmt := p.parseStatement()
+		stmt := p.parseDeclaration()
 		if stmt != nil {
 			program.Statements = append(program.Statements, stmt)
 		}
@@ -130,19 +130,17 @@ func (p *Parser) Errors() []error {
  *                             PRIVATE FUNCTIONS                             *
  *****************************************************************************/
 
-func (p *Parser) parseStatement() ast.Statement {
+func (p *Parser) parseDeclaration() ast.Statement {
 	switch p.current.Type {
 	case token.LET:
-		return p.parseLetStatement()
-	case token.RETURN:
-		return p.parseReturnStatement()
+		return p.parseLetDeclaration()
 	default:
-		return p.parseExpressionStatement()
+		return p.parseStatement()
 	}
 }
 
-func (p *Parser) parseLetStatement() *ast.LetStatement {
-	stmt := &ast.LetStatement{Token: p.current}
+func (p *Parser) parseLetDeclaration() *ast.LetDeclaration {
+	stmt := &ast.LetDeclaration{Token: p.current}
 
 	if !p.expect(token.IDENT) {
 		return nil
@@ -163,6 +161,15 @@ func (p *Parser) parseLetStatement() *ast.LetStatement {
 	}
 
 	return stmt
+}
+
+func (p *Parser) parseStatement() ast.Statement {
+	switch p.current.Type {
+	case token.RETURN:
+		return p.parseReturnStatement()
+	default:
+		return p.parseExpressionStatement()
+	}
 }
 
 func (p *Parser) parseReturnStatement() *ast.ReturnStatement {
@@ -198,7 +205,7 @@ func (p *Parser) parseBlock() *ast.Block {
 	p.next()
 
 	for !p.currentTokenIs(token.RBRACE) && !p.currentTokenIs(token.EOF) {
-		stmt := p.parseStatement()
+		stmt := p.parseDeclaration()
 		if stmt != nil {
 			block.Statements = append(block.Statements, stmt)
 		}

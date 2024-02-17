@@ -13,16 +13,16 @@ func DefineMacros(program *ast.Program, env *object.Environment) {
 	var definitions []int
 	for i, stmt := range program.Statements {
 		if isMacroDefinition(stmt) {
-			let, _ := stmt.(*ast.LetStatement)
-			literal, _ := let.Value.(*ast.MacroLiteral)
+			decl, _ := stmt.(*ast.LetDeclaration)
+			lit, _ := decl.Value.(*ast.MacroLiteral)
 
 			macro := &object.Macro{
-				Parameters: literal.Parameters,
+				Parameters: lit.Parameters,
 				Env:        env,
-				Body:       literal.Body,
+				Body:       lit.Body,
 			}
 
-			env.Set(let.Name.Value, macro)
+			env.Set(decl.Name.Value, macro)
 			definitions = append(definitions, i)
 		}
 	}
@@ -66,12 +66,12 @@ func ExpandMacros(program ast.Node, env *object.Environment) ast.Node {
  *****************************************************************************/
 
 func isMacroDefinition(node ast.Statement) bool {
-	let, ok := node.(*ast.LetStatement)
+	decl, ok := node.(*ast.LetDeclaration)
 	if !ok {
 		return false
 	}
 
-	_, ok = let.Value.(*ast.MacroLiteral)
+	_, ok = decl.Value.(*ast.MacroLiteral)
 	if !ok {
 		return false
 	}

@@ -20,6 +20,11 @@ type Statement interface {
 	statementNode()
 }
 
+type Declaration interface {
+	Statement
+	declarationNode()
+}
+
 type Expression interface {
 	Node
 	expressionNode()
@@ -33,7 +38,7 @@ type Program struct {
 	Statements []Statement
 }
 
-type LetStatement struct {
+type LetDeclaration struct {
 	Token token.Token // The token.LET token
 	Name  *Identifier
 	Value Expression
@@ -155,17 +160,39 @@ func (p *Program) String() string {
 }
 
 /*****************************************************************************
+ *                               DECLARATION                                 *
+ *****************************************************************************/
+
+func (ld *LetDeclaration) statementNode() {}
+
+func (ld *LetDeclaration) TokenLexeme() string {
+	return ld.Token.Lexeme
+}
+
+func (ld *LetDeclaration) String() string {
+	var out bytes.Buffer
+
+	out.WriteString(ld.TokenLexeme() + " ")
+	out.WriteString(ld.Name.String())
+	out.WriteString(" = ")
+
+	if ld.Value != nil {
+		out.WriteString(ld.Value.String())
+	}
+
+	out.WriteString(";")
+
+	return out.String()
+}
+
+/*****************************************************************************
  *                                STATEMENTS                                 *
  *****************************************************************************/
 
-func (ls *LetStatement) statementNode()        {}
 func (rs *ReturnStatement) statementNode()     {}
 func (es *ExpressionStatement) statementNode() {}
 func (bs *Block) statementNode()               {}
 
-func (ls *LetStatement) TokenLexeme() string {
-	return ls.Token.Lexeme
-}
 func (rs *ReturnStatement) TokenLexeme() string {
 	return rs.Token.Lexeme
 }
@@ -176,21 +203,6 @@ func (bs *Block) TokenLexeme() string {
 	return bs.Token.Lexeme
 }
 
-func (ls *LetStatement) String() string {
-	var out bytes.Buffer
-
-	out.WriteString(ls.TokenLexeme() + " ")
-	out.WriteString(ls.Name.String())
-	out.WriteString(" = ")
-
-	if ls.Value != nil {
-		out.WriteString(ls.Value.String())
-	}
-
-	out.WriteString(";")
-
-	return out.String()
-}
 func (rs *ReturnStatement) String() string {
 	var out bytes.Buffer
 

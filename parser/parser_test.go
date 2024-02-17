@@ -10,7 +10,7 @@ import (
 	"testing"
 )
 
-func TestLetStatements(t *testing.T) {
+func TestLetDeclaration(t *testing.T) {
 	tests := []struct {
 		input    string
 		expected struct {
@@ -62,7 +62,7 @@ func TestLetStatements(t *testing.T) {
 	}
 }
 
-func TestReturnStatements(t *testing.T) {
+func TestReturnStatement(t *testing.T) {
 	tests := []struct {
 		input    string
 		expected any
@@ -148,7 +148,7 @@ func TestNumberLiteral(t *testing.T) {
 	}
 }
 
-func TestPrefixExpressions(t *testing.T) {
+func TestPrefixExpression(t *testing.T) {
 	tests := []struct {
 		input    string
 		expected struct {
@@ -215,7 +215,7 @@ func TestPrefixExpressions(t *testing.T) {
 	}
 }
 
-func TestInfixExpressions(t *testing.T) {
+func TestInfixExpression(t *testing.T) {
 	tests := []struct {
 		input    string
 		expected struct {
@@ -371,7 +371,7 @@ func TestInfixExpressions(t *testing.T) {
 	}
 }
 
-func TestGroupedExpressions(t *testing.T) {
+func TestGroupedExpression(t *testing.T) {
 	tests := []struct {
 		input    string
 		expected struct {
@@ -612,7 +612,7 @@ func TestFunctionLiteral(t *testing.T) {
 	}
 }
 
-func TestCallExpressionParsing(t *testing.T) {
+func TestCallExpression(t *testing.T) {
 	tests := []struct {
 		input    string
 		expected struct {
@@ -983,8 +983,8 @@ func testProgram(t *testing.T, i int, program *ast.Program) {
 
 func testStatement(stmt ast.Statement) func(*testing.T, int, ast.Statement, ...any) {
 	switch stmt.(type) {
-	case *ast.LetStatement:
-		return testLetStatement
+	case *ast.LetDeclaration:
+		return testLetDeclaration
 	case *ast.ReturnStatement:
 		return testReturnStatement
 	case *ast.ExpressionStatement:
@@ -1031,14 +1031,14 @@ func testExpression(exp ast.Expression) func(*testing.T, int, ast.Expression, ..
 	}
 }
 
-func testLetStatement(t *testing.T, i int, stmt ast.Statement, expected ...any) {
-	assertions.AssertTypeOf(t, reflect.TypeOf(ast.LetStatement{}), stmt, "test["+strconv.Itoa(i)+"] - ast.Statement unexpected type")
+func testLetDeclaration(t *testing.T, i int, stmt ast.Statement, expected ...any) {
+	assertions.AssertTypeOf(t, reflect.TypeOf(ast.LetDeclaration{}), stmt, "test["+strconv.Itoa(i)+"] - ast.Statement unexpected type")
 	assertions.AssertStringEquals(t, "let", stmt.TokenLexeme(), "test["+strconv.Itoa(i)+"] - ast.Statement.TokenLexeme() wrong")
 	if 1 >= len(expected) {
 		t.Fatalf("testLetStatement: len(expect) wrong: expect=>1, actual=%d", len(expected))
 	}
-	testIdentifier(t, i, stmt.(*ast.LetStatement).Name, expected[0])
-	testExpression(stmt.(*ast.LetStatement).Value)(t, i, stmt.(*ast.LetStatement).Value, expected[1:]...)
+	testIdentifier(t, i, stmt.(*ast.LetDeclaration).Name, expected[0])
+	testExpression(stmt.(*ast.LetDeclaration).Value)(t, i, stmt.(*ast.LetDeclaration).Value, expected[1:]...)
 }
 
 func testReturnStatement(t *testing.T, i int, stmt ast.Statement, expected ...any) {

@@ -15,7 +15,7 @@ func TestString(t *testing.T) {
 		{
 			&Program{
 				Statements: []Statement{
-					&LetStatement{
+					&LetDeclaration{
 						Token: token.Token{Type: token.LET, Lexeme: "let"},
 						Name: &Identifier{
 							Token: token.Token{Type: token.IDENT, Lexeme: "ident"},

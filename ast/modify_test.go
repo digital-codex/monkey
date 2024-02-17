@@ -216,7 +216,7 @@ func TestModify(t *testing.T) {
 				node     Node
 				modifier Modifier
 			}{
-				node: &LetStatement{Value: &NumberLiteral{Value: 1}},
+				node: &LetDeclaration{Value: &NumberLiteral{Value: 1}},
 				modifier: func(node Node) Node {
 					integer, ok := node.(*NumberLiteral)
 					if !ok {
@@ -232,7 +232,7 @@ func TestModify(t *testing.T) {
 
 				},
 			},
-			expected: &LetStatement{Value: &NumberLiteral{Value: 2}},
+			expected: &LetDeclaration{Value: &NumberLiteral{Value: 2}},
 		},
 		{
 			input: struct {
