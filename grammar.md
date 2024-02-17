@@ -5,7 +5,7 @@ nested syntax tree structure. It starts with the first rule that matches an enti
 Monkey program (or a single REPL entry).
 
 ````
-program     -> declaraction* EOF ;
+program     -> declaraction* <EOF> ;
 ````
 
 ### Declarations § 1.1.1
@@ -17,7 +17,7 @@ identifiers or any of the other statements types.
 declaration -> letDecl
              | statement ;
 
-letDecl     -> "let" <IDENTIFIER> "=" expression ";"? ;
+letDecl     -> <LET> <IDENT> <EQUAL> expression <SEMICOLON>? ;
 ````
 
 ### Statements § 1.1.2
@@ -26,11 +26,11 @@ The remaining statement rules produce side effects, but do not introduce \
 bindings.
 
 ````
-statement   -> exprStmt
-             | returnStmt ;
+statement   -> returnStmt
+             | exprStmt ;
 
-exprStmt    -> expression ";"? ;
-returnStmt  -> "return" expression ";"? ;
+returnStmt  -> <RETURN> expression <SEMICOLON>? ;
+exprStmt    -> expression <SEMICOLON>? ;
 ````
 
 ### Expression § 1.1.3
@@ -43,23 +43,22 @@ we use a separate rule for each precedence level to make it explicit.
 ````
 expression  -> equality ;
 
-equality    -> comparison ( ( "!=" | "==" ) comparison* )* ;
-comparison  -> term ( ( ">" | "<" ) term )* ;
-term        -> factor ( ( "-" | "+" ) factor )* ;
-factor      -> unary ( ( "/" | "*" ) unary )* ;
+equality    -> comparison ( ( <EQUAL_EQUAL> | <BANG_EQUAL> ) comparison* )* ;
+comparison  -> term ( ( <LESS> | <MORE> ) term )* ;
+term        -> factor ( ( <PLUS> | <MINUS> ) factor )* ;
+factor      -> unary ( ( <STAR> | <SLASH> ) unary )* ;
 
-unary       -> ( "!" | "-" ) unary | call ;
-call        -> index ( "(" expressions? ")" )* ;
-index       -> primary "[" expression "]" ;
-primary     -> "true" 
+unary       -> ( <BANG> | <MINUS> ) unary | call ;
+call        -> index ( <LPAREN> expressions? <RPAREN> )* ;
+index       -> primary <LBRACKET> expression <RBRACKET> ;
+primary     -> <IDENT>
+             | <NUMBER>
+             | <LPAREN> expression <RPAREN>
+             | "true" 
              | "false" 
-             | "null" 
-             | NUMBER 
-             | STRING 
-             | IDENTIFIER
-             | "(" expression ")"
              | if
              | function 
+             | <STRING>
              | array
              | hash
              | macro ;
@@ -71,16 +70,16 @@ In order to keep the above rules a littler cleaner, some of the grammar is split
 into a few reused helper rules.
 
 ````
-block       -> "{" declaration* "}" ;
-if          -> "if" "(" expression ")" block ( "else" block )? ;
-function    -> "fn" "(" parameters? ")" block ;
-array       -> "[" expressions* "]" ;
-hash        -> "{" pair* "}" ;
-macro       -> "macro" "(" parameters? ")" block ;
+block       -> <LBRACE> declaration* <RBRACE> ;
 
-parameters  -> IDENTIFIER ( "," IDENTIFIER )* ;
-expressions -> expression ( "," expression )* ;
-pair        -> expression ":" expression ( "," expression ":" expression )* ;
+if          -> <IF> <LPAREN> expression <RPAREN> block ( <ELSE> block )? ;
+function    -> <FN> <LPAREN> parameters? <RPAREN> block ;
+array       -> <LBRACKET> expressions* <RBRACKET> ;
+hash        -> <LBRACE> (expression <COLON> expression ( <COMMA> expression <COLON> expression )* )* <RBRACE> ;
+macro       -> <MACRO> <LPAREN> parameters? <RPAREN> block ;
+
+parameters  -> <IDENT> ( <COMMA> <IDENT> )* ;
+expressions -> expression ( <COMMA> expression )* ;
 ````
 
 ## Lexical Grammar § 1.2
@@ -90,10 +89,47 @@ Where the syntax is [context free](https://en.wikipedia.org/wiki/Context-free_gr
 there are no recursive rules.
 
 ````
-NUMBER      -> <DIGIT>+ ;
+EOF         -> "" ;
+
+EQUAL       -> "=" ;
+EQUAL_EQUAL -> "==" ;
+BANG        -> "!" ;
+BANG_EQUAL  -> "!=" ;
+
+PLUS        -> "+" ;
+MINUS       -> "-" ;
+STAR        -> "*" ;
+SLASH       -> "/" ;
+
+LESS        -> "<" ;
+MORE        -> ">" ;
+
+COMMA       -> "," ;
+COLON       -> ":" ;
+SEMICOLON   -> ";" ;
+
+LPAREN       -> "(" ;
+LBRACE       -> "{" ;
+LBRACKET     -> "[" ;
+RPAREN       -> ")" ;
+RBRACE       -> "}" ;
+RBRACKET     -> "]" ;
+
 STRING      -> "\"" <CHARACTER>* "\"" ;
-IDENTIFIER  -> <ALPHA>+ ;
+IDENT       -> <ALPHA>+ ;
+NUMBER      -> <DIGIT>+ ;
+
+FN          -> "fn" ;
+LET         -> "let" ;
+TRUE        -> "true" ;
+FALSE       -> "false" ;
+IF          -> "if" ;
+ELSE        -> "else" ;
+RETURN      -> "return" ;
+MACRO       -> "macro" ;
+
 ALPHA       -> "a" ... "z" | "A" ... "Z" | "_" ;
 DIGIT       -> "0" ... "9" ;
 CHARACTER   -> "\t" | " " ... "~" ;
+WHITESPACE  -> " " | "\t" | "\n" | "\r" ;
 ````

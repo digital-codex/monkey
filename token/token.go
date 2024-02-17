@@ -48,9 +48,9 @@ const (
 	/*
 	 * Identifiers + lexemes
 	 */
+	STRING
 	IDENT
 	NUMBER
-	STRING
 
 	/*
 	 * Keywords

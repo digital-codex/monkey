@@ -34,38 +34,38 @@ type Program struct {
 }
 
 type LetStatement struct {
-	Token token.Token // the 'let' token
+	Token token.Token // The token.LET token
 	Name  *Identifier
 	Value Expression
 }
 
 type ReturnStatement struct {
-	Token       token.Token // the 'return' token
+	Token       token.Token // The token.RETURN token
 	ReturnValue Expression
 }
 
 type ExpressionStatement struct {
-	Token      token.Token // the first token of the expression
+	Token      token.Token // The first token of the expression
 	Expression Expression
 }
 
 type Block struct {
-	Token      token.Token
+	Token      token.Token // The token.LBRACE token
 	Statements []Statement
 }
 
 type Identifier struct {
-	Token token.Token // the token.IDENT token
+	Token token.Token // The token.IDENT token
 	Value string
 }
 
 type IntegerLiteral struct {
-	Token token.Token
+	Token token.Token // The token.NUMBER token
 	Value int64
 }
 
 type PrefixExpression struct {
-	Token    token.Token // The prefix token, e.g. !
+	Token    token.Token // The operator token, e.g. !
 	Operator string
 	Right    Expression
 }
@@ -77,53 +77,58 @@ type InfixExpression struct {
 	Right    Expression
 }
 
+type GroupedExpression struct {
+	Token      token.Token // The token.LPAREN token
+	Expression Expression
+}
+
 type Boolean struct {
-	Token token.Token
+	Token token.Token // The token.TRUE or token.FALSE token
 	Value bool
 }
 
 type IfExpression struct {
-	Token       token.Token // The 'if' token
+	Token       token.Token // The token.IF token
 	Condition   Expression
 	Consequence *Block
 	Alternative *Block
 }
 
 type FunctionLiteral struct {
-	Token      token.Token // The 'fn' token
+	Token      token.Token // The token.FN token
 	Parameters []*Identifier
 	Body       *Block
 }
 
 type CallExpression struct {
-	Token    token.Token // The LPAREN token
+	Token    token.Token // The token.LPAREN token
 	Function Expression  // Identifier or FunctionLiteral
 	Argument []Expression
 }
 
 type StringLiteral struct {
-	Token token.Token
+	Token token.Token // The token.STRING token
 	Value string
 }
 
 type ArrayLiteral struct {
-	Token    token.Token // the '[' token
+	Token    token.Token // The token.LBRACKET token
 	Elements []Expression
 }
 
 type IndexExpression struct {
-	Token token.Token // The '[' token
+	Token token.Token // The token.LBRACKET token
 	Left  Expression
 	Index Expression
 }
 
 type HashLiteral struct {
-	Token token.Token // the '{' token
+	Token token.Token // The token.LBRACE token
 	Pairs map[Expression]Expression
 }
 
 type MacroLiteral struct {
-	Token      token.Token // the 'macro' token
+	Token      token.Token // The token.MACRO token
 	Parameters []*Identifier
 	Body       *Block
 }

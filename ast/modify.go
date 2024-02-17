@@ -1,8 +1,8 @@
 package ast
 
-type ModifierFunc func(Node) Node
+type Modifier func(Node) Node
 
-func Modify(node Node, modifier ModifierFunc) Node {
+func Modify(node Node, modifier Modifier) Node {
 	switch node := node.(type) {
 	case *Program:
 		for i, statement := range node.Statements {

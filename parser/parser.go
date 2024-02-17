@@ -267,6 +267,17 @@ func (p *Parser) parseInfixExpression(left ast.Expression) ast.Expression {
 	return expression
 }
 
+func (p *Parser) parseGroupedExpression() ast.Expression {
+	p.next()
+
+	exp := p.parseExpression(NONE)
+	if !p.expect(token.RPAREN) {
+		return nil
+	}
+
+	return exp
+}
+
 func (p *Parser) parseBoolean() ast.Expression {
 	return &ast.Boolean{Token: p.current, Value: p.currentTokenIs(token.TRUE)}
 }
@@ -394,17 +405,6 @@ func (p *Parser) parseMacroLiteral() ast.Expression {
 	return lit
 }
 
-func (p *Parser) parseGroupedExpression() ast.Expression {
-	p.next()
-
-	exp := p.parseExpression(NONE)
-	if !p.expect(token.RPAREN) {
-		return nil
-	}
-
-	return exp
-}
-
 func (p *Parser) parseParameters() []*ast.Identifier {
 	var identifiers []*ast.Identifier
 
@@ -421,7 +421,7 @@ func (p *Parser) parseParameters() []*ast.Identifier {
 	for p.peekTokenIs(token.COMMA) {
 		p.next()
 		p.next()
-		ident := &ast.Identifier{Token: p.current, Value: p.current.Lexeme}
+		ident = &ast.Identifier{Token: p.current, Value: p.current.Lexeme}
 		identifiers = append(identifiers, ident)
 	}
 
