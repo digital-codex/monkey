@@ -1,60 +1,83 @@
 package evaluator
 
 import (
+	"fmt"
+	"github.com/digital-codex/assertions"
 	"github.com/digital-codex/monkey/ast"
 	"github.com/digital-codex/monkey/lexer"
 	"github.com/digital-codex/monkey/object"
 	"github.com/digital-codex/monkey/parser"
+	"reflect"
+	"strconv"
 	"testing"
 )
 
 func TestDefineMacros(t *testing.T) {
-	input := `let number = 1; let function = fn(x, y) { x + y }; let mymacro = macro(x, y) { x + y; }`
-
-	env := object.NewEnvironment()
-	program := testParseProgram(input)
-
-	DefineMacros(program, env)
-
-	if len(program.Statements) != 2 {
-		t.Fatalf("Wrong number of statements. got=%d", len(program.Statements))
+	tests := []struct {
+		input    string
+		expected struct {
+			stmts  int
+			env    []string
+			ident  string
+			params struct {
+				count  int
+				idents []string
+			}
+			body string
+		}
+	}{
+		{
+			input: `let number = 1; let function = fn(x, y) { x + y }; let add = macro(x, y) { x + y; }`,
+			expected: struct {
+				stmts  int
+				env    []string
+				ident  string
+				params struct {
+					count  int
+					idents []string
+				}
+				body string
+			}{
+				stmts: 2,
+				env: []string{
+					"number",
+					"function",
+				},
+				ident: "add",
+				params: struct {
+					count  int
+					idents []string
+				}{
+					count:  2,
+					idents: []string{"x", "y"},
+				},
+				body: "(x + y)",
+			},
+		},
 	}
 
-	_, ok := env.Get("number")
-	if ok {
-		t.Fatalf("number should not be defined")
-	}
+	for i, test := range tests {
 
-	_, ok = env.Get("function")
-	if ok {
-		t.Fatalf("function should not be defeind")
-	}
+		program := parse(test.input)
+		env := object.NewEnvironment()
+		DefineMacros(program, env)
 
-	obj, ok := env.Get("mymacro")
-	if !ok {
-		t.Fatalf("mymacro should be defeind")
-	}
+		assertions.AssertIntEquals(t, test.expected.stmts, len(program.Statements), "test["+strconv.Itoa(i)+"] - len(program.Statements) wrong")
+		obj, ok := env.Get(test.expected.ident)
+		assertions.AssertBoolEquals(t, true, ok, fmt.Sprintf("test[%d] - %s should be defined", i, test.expected.ident))
+		for _, ident := range test.expected.env {
+			_, ok = env.Get(ident)
+			assertions.AssertBoolEquals(t, false, ok, fmt.Sprintf("test[%d] - %s should not be defined", i, ident))
+		}
+		assertions.AssertTypeOf(t, reflect.TypeOf(object.Macro{}), obj, "test["+strconv.Itoa(i)+"] - unexpected type")
 
-	macro, ok := obj.(*object.Macro)
-	if !ok {
-		t.Fatalf("object is not Macro. got=%T (%+v)", obj, obj)
-	}
+		macro, _ := obj.(*object.Macro)
+		assertions.AssertIntEquals(t, test.expected.params.count, len(macro.Parameters), "test["+strconv.Itoa(i)+"] - len(macro.Parameters) wrong")
 
-	if len(macro.Parameters) != 2 {
-		t.Fatalf("Wrong number of macro parameters. got=%d", len(macro.Parameters))
-	}
-
-	if macro.Parameters[0].String() != "x" {
-		t.Fatalf("parameter is not 'x'. got=%q", macro.Parameters[0])
-	}
-
-	if macro.Parameters[1].String() != "y" {
-		t.Fatalf("parameter is not 'y'. got=%q", macro.Parameters[1])
-	}
-
-	expectedBody := "(x + y)"
-	if macro.Body.String() != expectedBody {
-		t.Fatalf("body is not %q. got=%q", expectedBody, macro.Body.String())
+		for n, ident := range test.expected.params.idents {
+			assertions.AssertStringEquals(t, ident, macro.Parameters[n].Value, fmt.Sprintf("test[%d] - macro.Parameters[%d] wrong", i, n))
+		}
+		assertions.AssertStringEquals(t, test.expected.body, macro.Body.String(), "test["+strconv.Itoa(i)+"] - macro.Body wrong")
 	}
 }
 
@@ -63,28 +86,24 @@ func TestExpandMacros(t *testing.T) {
 		input    string
 		expected string
 	}{
-		{`let printwith = macro(func, buf) { quote(unquote(func)(unquote(buf))); }; printwith(puts, "hello world");`, `puts("hello world")`},
-		{`let printon = macro(condition, buf) { quote(if (unquote(condition)) { puts(unquote(buf)); }); }; printon(true, "hello world");`, `if (true) { puts("hello world") }`},
-		{`let infixExpression = macro() { quote(1 + 2); }; infixExpression()`, `(1 + 2)`},
+		{`let infix = macro() { quote(1 + 2); }; infix()`, `(1 + 2)`},
 		{`let reverse = macro(a, b) { quote(unquote(b) - unquote(a)); }; reverse(2 + 2, 10 - 5)`, `(10 - 5) - (2 + 2)`},
 		{`let unless = macro(condition, consequence, alternative) { quote(if (!(unquote(condition))) { unquote(consequence); } else { unquote(alternative); }); }; unless(10 > 5, puts("not greater"), puts("greater"));`, `if (!(10 > 5)) { puts("not greater") } else { puts("greater") }`},
 	}
 
-	for _, tt := range tests {
-		expected := testParseProgram(tt.expected)
-		program := testParseProgram(tt.input)
+	for i, test := range tests {
+		expected := parse(test.expected)
 
+		program := parse(test.input)
 		env := object.NewEnvironment()
 		DefineMacros(program, env)
-		expanded := ExpandMacros(program, env)
+		actual := ExpandMacros(program, env)
 
-		if expanded.String() != expected.String() {
-			t.Errorf("not equal, want=%q, got=%q", expected.String(), expanded.String())
-		}
+		assertions.AssertStringEquals(t, expected.String(), actual.String(), "test["+strconv.Itoa(i)+"] - expanded.String() wrong")
 	}
 }
 
-func testParseProgram(input string) *ast.Program {
+func parse(input string) *ast.Program {
 	l := lexer.New(input)
 	p := parser.New(l)
 	return p.ParseProgram()

@@ -1,12 +1,20 @@
 package ast
 
+/*****************************************************************************
+ *                                  TYPES                                    *
+ *****************************************************************************/
+
 type Modifier func(Node) Node
+
+/*****************************************************************************
+ *                              PUBLIC FUNCTIONS                             *
+ *****************************************************************************/
 
 func Modify(node Node, modifier Modifier) Node {
 	switch node := node.(type) {
 	case *Program:
-		for i, statement := range node.Statements {
-			node.Statements[i], _ = Modify(statement, modifier).(Statement)
+		for i, stmt := range node.Statements {
+			node.Statements[i], _ = Modify(stmt, modifier).(Statement)
 		}
 	case *LetStatement:
 		node.Value, _ = Modify(node.Value, modifier).(Expression)
@@ -15,8 +23,8 @@ func Modify(node Node, modifier Modifier) Node {
 	case *ExpressionStatement:
 		node.Expression, _ = Modify(node.Expression, modifier).(Expression)
 	case *Block:
-		for i, statement := range node.Statements {
-			node.Statements[i], _ = Modify(statement, modifier).(Statement)
+		for i, stmt := range node.Statements {
+			node.Statements[i], _ = Modify(stmt, modifier).(Statement)
 		}
 	case *PrefixExpression:
 		node.Right, _ = Modify(node.Right, modifier).(Expression)

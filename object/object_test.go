@@ -1,29 +1,16 @@
 package object
 
 import (
-	"fmt"
+	"github.com/digital-codex/assertions"
 	"testing"
 )
 
 func TestStringHashKey(t *testing.T) {
-	hello1 := &String{Value: "Hello World"}
-	hello2 := &String{Value: "Hello World"}
-	diff1 := &String{Value: "My name is treyvon"}
-	diff2 := &String{Value: "My name is treyvon"}
+	hello := &String{Value: "Hello World"}
+	check := &String{Value: "Hello World"}
 
-	foo := hello1.HashKey()
-	fmt.Printf("%+v", foo)
-	bar := hello2.HashKey()
-	fmt.Printf("%+v", bar)
-	if hello1.HashKey() != hello2.HashKey() {
-		t.Errorf("strings with same content have different hash keys")
-	}
+	goodbye := &String{Value: "Goodbye Moon"}
 
-	if diff1.HashKey() != diff2.HashKey() {
-		t.Errorf("strings with same content have different hash keys")
-	}
-
-	if hello1.HashKey() == diff1.HashKey() {
-		t.Errorf("strings with different content have same hash keys")
-	}
+	assertions.AssertEquals(t, hello.HashKey(), check.HashKey(), "strings with check content have different hash keys")
+	assertions.AssertNotEquals(t, hello.HashKey(), goodbye.HashKey(), "strings with different content have check hash keys")
 }

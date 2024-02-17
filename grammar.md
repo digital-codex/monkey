@@ -89,8 +89,6 @@ Where the syntax is [context free](https://en.wikipedia.org/wiki/Context-free_gr
 there are no recursive rules.
 
 ````
-EOF         -> "" ;
-
 EQUAL       -> "=" ;
 EQUAL_EQUAL -> "==" ;
 BANG        -> "!" ;
@@ -128,8 +126,10 @@ ELSE        -> "else" ;
 RETURN      -> "return" ;
 MACRO       -> "macro" ;
 
+WHITESPACE  -> " " | "\t" | "\n" | "\r" ;
 ALPHA       -> "a" ... "z" | "A" ... "Z" | "_" ;
 DIGIT       -> "0" ... "9" ;
 CHARACTER   -> "\t" | " " ... "~" ;
-WHITESPACE  -> " " | "\t" | "\n" | "\r" ;
+
+EOF         -> "" ;
 ````

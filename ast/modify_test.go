@@ -1,118 +1,341 @@
 package ast
 
 import (
-	"reflect"
+	"fmt"
+	"github.com/digital-codex/assertions"
+	"strconv"
 	"testing"
 )
 
 func TestModify(t *testing.T) {
-	one := func() Expression { return &IntegerLiteral{Value: 1} }
-	two := func() Expression { return &IntegerLiteral{Value: 2} }
-
-	turnOneIntoTwo := func(node Node) Node {
-		integer, ok := node.(*IntegerLiteral)
-		if !ok {
-			return node
-		}
-
-		if integer.Value != 1 {
-			return node
-		}
-
-		integer.Value = 2
-		return integer
-	}
-
 	tests := []struct {
-		input    Node
+		input struct {
+			node     Node
+			modifier Modifier
+		}
 		expected Node
 	}{
 		{
-			one(),
-			two(),
-		},
-		{
-			&Program{Statements: []Statement{&ExpressionStatement{Expression: one()}}},
-			&Program{Statements: []Statement{&ExpressionStatement{Expression: two()}}},
-		},
-		{
-			&InfixExpression{Left: one(), Operator: "+", Right: two()},
-			&InfixExpression{Left: two(), Operator: "+", Right: two()},
-		},
-		{
-			&InfixExpression{Left: two(), Operator: "+", Right: one()},
-			&InfixExpression{Left: two(), Operator: "+", Right: two()},
-		},
-		{
-			&PrefixExpression{Operator: "+", Right: one()},
-			&PrefixExpression{Operator: "+", Right: two()},
-		},
-		{
-			&IndexExpression{Left: one(), Index: one()},
-			&IndexExpression{Left: two(), Index: two()},
-		},
-		{
-			&IfExpression{
-				Condition:   one(),
-				Consequence: &Block{Statements: []Statement{&ExpressionStatement{Expression: one()}}},
-				Alternative: &Block{Statements: []Statement{&ExpressionStatement{Expression: one()}}},
+			input: struct {
+				node     Node
+				modifier Modifier
+			}{
+				node: &IntegerLiteral{Value: 1},
+				modifier: func(node Node) Node {
+					integer, ok := node.(*IntegerLiteral)
+					if !ok {
+						return node
+					}
+
+					if integer.Value != 1 {
+						return node
+					}
+
+					integer.Value = 2
+					return integer
+
+				},
 			},
-			&IfExpression{
-				Condition:   two(),
-				Consequence: &Block{Statements: []Statement{&ExpressionStatement{Expression: two()}}},
-				Alternative: &Block{Statements: []Statement{&ExpressionStatement{Expression: two()}}},
+			expected: &IntegerLiteral{Value: 2},
+		},
+		{
+			input: struct {
+				node     Node
+				modifier Modifier
+			}{
+				node: &Program{
+					Statements: []Statement{&ExpressionStatement{Expression: &IntegerLiteral{Value: 1}}},
+				},
+				modifier: func(node Node) Node {
+					integer, ok := node.(*IntegerLiteral)
+					if !ok {
+						return node
+					}
+
+					if integer.Value != 1 {
+						return node
+					}
+
+					integer.Value = 2
+					return integer
+
+				},
+			},
+			expected: &Program{
+				Statements: []Statement{&ExpressionStatement{Expression: &IntegerLiteral{Value: 2}}},
 			},
 		},
 		{
-			&ReturnStatement{ReturnValue: one()},
-			&ReturnStatement{ReturnValue: two()},
+			input: struct {
+				node     Node
+				modifier Modifier
+			}{
+				node: &InfixExpression{Left: &IntegerLiteral{Value: 1}, Operator: "+", Right: &IntegerLiteral{Value: 2}},
+				modifier: func(node Node) Node {
+					integer, ok := node.(*IntegerLiteral)
+					if !ok {
+						return node
+					}
+
+					if integer.Value != 1 {
+						return node
+					}
+
+					integer.Value = 2
+					return integer
+
+				},
+			},
+			expected: &InfixExpression{Left: &IntegerLiteral{Value: 2}, Operator: "+", Right: &IntegerLiteral{Value: 2}},
 		},
 		{
-			&LetStatement{Value: one()},
-			&LetStatement{Value: two()},
+			input: struct {
+				node     Node
+				modifier Modifier
+			}{
+				node: &InfixExpression{Left: &IntegerLiteral{Value: 2}, Operator: "+", Right: &IntegerLiteral{Value: 1}},
+				modifier: func(node Node) Node {
+					integer, ok := node.(*IntegerLiteral)
+					if !ok {
+						return node
+					}
+
+					if integer.Value != 1 {
+						return node
+					}
+
+					integer.Value = 2
+					return integer
+
+				},
+			},
+			expected: &InfixExpression{Left: &IntegerLiteral{Value: 2}, Operator: "+", Right: &IntegerLiteral{Value: 2}},
 		},
 		{
-			&FunctionLiteral{
+			input: struct {
+				node     Node
+				modifier Modifier
+			}{
+				node: &PrefixExpression{Operator: "+", Right: &IntegerLiteral{Value: 1}},
+				modifier: func(node Node) Node {
+					integer, ok := node.(*IntegerLiteral)
+					if !ok {
+						return node
+					}
+
+					if integer.Value != 1 {
+						return node
+					}
+
+					integer.Value = 2
+					return integer
+
+				},
+			},
+			expected: &PrefixExpression{Operator: "+", Right: &IntegerLiteral{Value: 2}},
+		},
+		{
+			input: struct {
+				node     Node
+				modifier Modifier
+			}{
+				node: &IndexExpression{Left: &IntegerLiteral{Value: 1}, Index: &IntegerLiteral{Value: 1}},
+				modifier: func(node Node) Node {
+					integer, ok := node.(*IntegerLiteral)
+					if !ok {
+						return node
+					}
+
+					if integer.Value != 1 {
+						return node
+					}
+
+					integer.Value = 2
+					return integer
+
+				},
+			},
+			expected: &IndexExpression{Left: &IntegerLiteral{Value: 2}, Index: &IntegerLiteral{Value: 2}},
+		},
+		{
+			input: struct {
+				node     Node
+				modifier Modifier
+			}{
+				node: &IfExpression{
+					Condition:   &IntegerLiteral{Value: 1},
+					Consequence: &Block{Statements: []Statement{&ExpressionStatement{Expression: &IntegerLiteral{Value: 1}}}},
+					Alternative: &Block{Statements: []Statement{&ExpressionStatement{Expression: &IntegerLiteral{Value: 1}}}},
+				},
+				modifier: func(node Node) Node {
+					integer, ok := node.(*IntegerLiteral)
+					if !ok {
+						return node
+					}
+
+					if integer.Value != 1 {
+						return node
+					}
+
+					integer.Value = 2
+					return integer
+
+				},
+			},
+			expected: &IfExpression{
+				Condition:   &IntegerLiteral{Value: 2},
+				Consequence: &Block{Statements: []Statement{&ExpressionStatement{Expression: &IntegerLiteral{Value: 2}}}},
+				Alternative: &Block{Statements: []Statement{&ExpressionStatement{Expression: &IntegerLiteral{Value: 2}}}},
+			},
+		},
+		{
+			input: struct {
+				node     Node
+				modifier Modifier
+			}{
+				node: &ReturnStatement{ReturnValue: &IntegerLiteral{Value: 1}},
+				modifier: func(node Node) Node {
+					integer, ok := node.(*IntegerLiteral)
+					if !ok {
+						return node
+					}
+
+					if integer.Value != 1 {
+						return node
+					}
+
+					integer.Value = 2
+					return integer
+
+				},
+			},
+			expected: &ReturnStatement{ReturnValue: &IntegerLiteral{Value: 2}},
+		},
+		{
+			input: struct {
+				node     Node
+				modifier Modifier
+			}{
+				node: &LetStatement{Value: &IntegerLiteral{Value: 1}},
+				modifier: func(node Node) Node {
+					integer, ok := node.(*IntegerLiteral)
+					if !ok {
+						return node
+					}
+
+					if integer.Value != 1 {
+						return node
+					}
+
+					integer.Value = 2
+					return integer
+
+				},
+			},
+			expected: &LetStatement{Value: &IntegerLiteral{Value: 2}},
+		},
+		{
+			input: struct {
+				node     Node
+				modifier Modifier
+			}{
+				node: &FunctionLiteral{
+					Parameters: []*Identifier{},
+					Body:       &Block{Statements: []Statement{&ExpressionStatement{Expression: &IntegerLiteral{Value: 1}}}},
+				},
+				modifier: func(node Node) Node {
+					integer, ok := node.(*IntegerLiteral)
+					if !ok {
+						return node
+					}
+
+					if integer.Value != 1 {
+						return node
+					}
+
+					integer.Value = 2
+					return integer
+
+				},
+			},
+			expected: &FunctionLiteral{
 				Parameters: []*Identifier{},
-				Body:       &Block{Statements: []Statement{&ExpressionStatement{Expression: one()}}},
-			},
-			&FunctionLiteral{
-				Parameters: []*Identifier{},
-				Body:       &Block{Statements: []Statement{&ExpressionStatement{Expression: two()}}},
+				Body:       &Block{Statements: []Statement{&ExpressionStatement{Expression: &IntegerLiteral{Value: 2}}}},
 			},
 		},
 		{
-			&ArrayLiteral{Elements: []Expression{one(), one()}},
-			&ArrayLiteral{Elements: []Expression{two(), two()}},
+			input: struct {
+				node     Node
+				modifier Modifier
+			}{
+				node: &ArrayLiteral{
+					Elements: []Expression{&IntegerLiteral{Value: 1}, &IntegerLiteral{Value: 1}},
+				},
+				modifier: func(node Node) Node {
+					integer, ok := node.(*IntegerLiteral)
+					if !ok {
+						return node
+					}
+
+					if integer.Value != 1 {
+						return node
+					}
+
+					integer.Value = 2
+					return integer
+
+				},
+			},
+			expected: &ArrayLiteral{
+				Elements: []Expression{&IntegerLiteral{Value: 2}, &IntegerLiteral{Value: 2}},
+			},
+		},
+		{
+			input: struct {
+				node     Node
+				modifier Modifier
+			}{
+				node: &HashLiteral{
+					Pairs: map[Expression]Expression{
+						&IntegerLiteral{Value: 1}: &IntegerLiteral{Value: 1},
+						&IntegerLiteral{Value: 1}: &IntegerLiteral{Value: 1},
+					},
+				},
+				modifier: func(node Node) Node {
+					integer, ok := node.(*IntegerLiteral)
+					if !ok {
+						return node
+					}
+
+					if integer.Value != 1 {
+						return node
+					}
+
+					integer.Value = 2
+					return integer
+
+				},
+			},
+			expected: &HashLiteral{
+				Pairs: map[Expression]Expression{
+					&IntegerLiteral{Value: 2}: &IntegerLiteral{Value: 2},
+					&IntegerLiteral{Value: 2}: &IntegerLiteral{Value: 2},
+				},
+			},
 		},
 	}
 
-	for _, tt := range tests {
-		modified := Modify(tt.input, turnOneIntoTwo)
-
-		equal := reflect.DeepEqual(modified, tt.expected)
-		if !equal {
-			t.Errorf("not equal. got=%#v, %#v", modified, tt.expected)
-		}
-	}
-
-	hashLiteral := &HashLiteral{
-		Pairs: map[Expression]Expression{
-			one(): one(),
-			one(): one(),
-		},
-	}
-
-	Modify(hashLiteral, turnOneIntoTwo)
-
-	for key, val := range hashLiteral.Pairs {
-		key, _ := key.(*IntegerLiteral)
-		if key.Value != 2 {
-			t.Errorf("value is not %d, got=%d", 2, key.Value)
-		}
-		val, _ := val.(*IntegerLiteral)
-		if val.Value != 2 {
-			t.Errorf("value is not %d, got=%d", 2, val.Value)
+	for i, test := range tests {
+		switch test.expected.(type) {
+		case *HashLiteral:
+			modified := Modify(test.input.node, test.input.modifier)
+			actual, ok := modified.(*HashLiteral)
+			if !ok {
+				t.Fatalf("TestModify: modified unexpected type: expect=&HashLiteral, actual=%T", modified)
+			}
+			assertions.AssertStringEquals(t, fmt.Sprint(test.expected.(*HashLiteral).Pairs), fmt.Sprint(actual.Pairs), "test["+strconv.Itoa(i)+"] - modified wrong")
+		default:
+			assertions.AssertDeepEquals(t, test.expected, Modify(test.input.node, test.input.modifier), "test["+strconv.Itoa(i)+"] - modified wrong")
 		}
 	}
 }

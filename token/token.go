@@ -2,6 +2,10 @@ package token
 
 import "strconv"
 
+/*****************************************************************************
+ *                                  TYPES                                    *
+ *****************************************************************************/
+
 type Type int
 
 type Token struct {
@@ -13,7 +17,7 @@ type Token struct {
 }
 
 const (
-	EOF Type = iota
+	ILLEGAL Type = iota
 
 	/*
 	 * Operators
@@ -64,11 +68,11 @@ const (
 	RETURN
 	MACRO
 
-	ILLEGAL
+	EOF
 )
 
 var lexemes = [...]string{
-	EOF: "",
+	ILLEGAL: "ILLEGAL",
 
 	/*
 	 * Operators
@@ -118,15 +122,19 @@ var lexemes = [...]string{
 	RETURN: "return",
 	MACRO:  "macro",
 
-	ILLEGAL: "ILLEGAL",
+	EOF: "",
 }
+
+/*****************************************************************************
+ *                              PUBLIC FUNCTIONS                             *
+ *****************************************************************************/
 
 func (t Type) String() string {
 	s := ""
-	if 0 <= t && t < Type(len(lexemes)) {
+	if ILLEGAL <= t && t < EOF {
 		s = lexemes[t]
 	}
-	if t != 0 && s == "" {
+	if t != EOF && s == "" {
 		s = "Type(" + strconv.Itoa(int(t)) + ")"
 	}
 	return s
