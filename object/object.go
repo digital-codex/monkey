@@ -18,6 +18,11 @@ type Object interface {
 	Inspect() string
 }
 
+type Closure interface {
+	env() *Environment
+	parameters() []*ast.Identifier
+}
+
 type Hashable interface {
 	HashKey() HashKey
 }
@@ -234,6 +239,24 @@ func (m *Macro) Inspect() string {
 	out.WriteString("{" + m.Body.String() + "}")
 
 	return out.String()
+}
+
+/*****************************************************************************
+ *                               CLOSURE                                     *
+ *****************************************************************************/
+
+func (f *Function) env() *Environment {
+	return f.Env
+}
+func (m *Macro) env() *Environment {
+	return m.Env
+}
+
+func (f *Function) parameters() []*ast.Identifier {
+	return f.Parameters
+}
+func (m *Macro) parameters() []*ast.Identifier {
+	return m.Parameters
 }
 
 /*****************************************************************************

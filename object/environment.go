@@ -24,6 +24,16 @@ func NewEnclosedEnvironment(outer *Environment) *Environment {
 	return env
 }
 
+func ExtendEnvironment(obj Closure, args []Object) *Environment {
+	env := NewEnclosedEnvironment(obj.env())
+
+	for i, param := range obj.parameters() {
+		env.Set(param.Value, args[i])
+	}
+
+	return env
+}
+
 func (e *Environment) Get(name string) (Object, bool) {
 	obj, ok := e.store[name]
 	if !ok && e.outer != nil {

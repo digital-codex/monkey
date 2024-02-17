@@ -12,41 +12,40 @@ import (
  *****************************************************************************/
 
 func quote(node ast.Node, env *object.Environment) object.Object {
-	node = condense(node, env)
+	node = unquote(node, env)
 	return &object.Quote{Node: node}
 }
 
-// TODO: change name 'evalUnquoteCall'
-func condense(quoted ast.Node, env *object.Environment) ast.Node {
+func unquote(quoted ast.Node, env *object.Environment) ast.Node {
 	return ast.Modify(quoted, func(node ast.Node) ast.Node {
 		if !isUnquotedCall(node) {
 			return node
 		}
 
-		call, ok := node.(*ast.CallExpression)
+		ce, ok := node.(*ast.CallExpression)
 		if !ok {
 			return node
 		}
 
-		if len(call.Argument) != 1 {
+		if len(ce.Argument) != 1 {
 			return node
 		}
 
-		unquoted := Eval(call.Argument[0], env)
-		return convert(unquoted)
+		unquoted := Eval(ce.Argument[0], env)
+		return convertObjectToNode(unquoted)
 	})
 }
 
 func isUnquotedCall(node ast.Node) bool {
-	call, ok := node.(*ast.CallExpression)
+	ce, ok := node.(*ast.CallExpression)
 	if !ok {
 		return false
 	}
 
-	return call.Function.TokenLexeme() == "unquote"
+	return ce.Function.TokenLexeme() == "unquote"
 }
 
-func convert(obj object.Object) ast.Node {
+func convertObjectToNode(obj object.Object) ast.Node {
 	switch obj := obj.(type) {
 	case *object.Number:
 		return &ast.NumberLiteral{Token: token.Token{Type: token.NUMBER, Lexeme: fmt.Sprintf("%d", obj.Value)}, Value: obj.Value}
