@@ -46,8 +46,8 @@ func ExpandMacros(program ast.Node, env *object.Environment) ast.Node {
 		}
 
 		var args []object.Object
-		for _, a := range ce.Argument {
-			args = append(args, &object.Quote{Node: a})
+		for _, arg := range ce.Argument {
+			args = append(args, &object.Quote{Node: arg})
 		}
 		extendedEnv := object.ExtendEnvironment(macro, args)
 		evaluated := Eval(macro.Body, extendedEnv)

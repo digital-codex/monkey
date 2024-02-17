@@ -1,7 +1,10 @@
 package evaluator
 
 import (
+	"github.com/digital-codex/assertions"
 	"github.com/digital-codex/monkey/object"
+	"reflect"
+	"strconv"
 	"testing"
 )
 
@@ -13,27 +16,18 @@ func TestQuote(t *testing.T) {
 		{`quote(5)`, `5`},
 		{`quote(5 + 8)`, `(5 + 8)`},
 		{`quote(foobar)`, `foobar`},
-		{`quote(foobar + barfoo)`, `(foobar + barfoo)`},
+		{`quote(hello + world)`, `(hello + world)`},
 	}
 
-	for _, tt := range tests {
-		evaluated := eval(tt.input)
-		quote, ok := evaluated.(*object.Quote)
-		if !ok {
-			t.Fatalf("expected *object.Quote. got=%T (%+v)", evaluated, evaluated)
-		}
-
-		if quote.Node == nil {
-			t.Fatalf("quote.Node is nil")
-		}
-
-		if quote.Node.String() != tt.expected {
-			t.Errorf("not equal. got=%q, want=%q", quote.Node.String(), tt.expected)
-		}
+	for i, test := range tests {
+		evaluated := eval(test.input)
+		assertions.AssertTypeOf(t, reflect.TypeOf(object.Quote{}), evaluated, "test["+strconv.Itoa(i)+"] - unexpected type")
+		assertions.AssertNotNull(t, evaluated.(*object.Quote).Node, "test["+strconv.Itoa(i)+"] evaluated.(*object.Quote).Node wrong")
+		assertions.AssertStringEquals(t, test.expected, evaluated.(*object.Quote).Node.String(), "test["+strconv.Itoa(i)+"] evaluated.(*object.Quote).Node.String() wrong")
 	}
 }
 
-func TestQuoteUnquote(t *testing.T) {
+func TestUnquote(t *testing.T) {
 	tests := []struct {
 		input    string
 		expected string
@@ -50,19 +44,10 @@ func TestQuoteUnquote(t *testing.T) {
 		{`let quotedInfixExpression = quote(4 + 4); quote(unquote(4 + 4) + unquote(quotedInfixExpression))`, `(8 + (4 + 4))`},
 	}
 
-	for _, tt := range tests {
-		evaluated := eval(tt.input)
-		quote, ok := evaluated.(*object.Quote)
-		if !ok {
-			t.Fatalf("expected *object.Quote. got=%T (%+v)", evaluated, evaluated)
-		}
-
-		if quote.Node == nil {
-			t.Fatalf("quote.Node is nil")
-		}
-
-		if quote.Node.String() != tt.expected {
-			t.Errorf("not equal. got=%q, want=%q", quote.Node.String(), tt.expected)
-		}
+	for i, test := range tests {
+		evaluated := eval(test.input)
+		assertions.AssertTypeOf(t, reflect.TypeOf(object.Quote{}), evaluated, "test["+strconv.Itoa(i)+"] - unexpected type")
+		assertions.AssertNotNull(t, evaluated.(*object.Quote).Node, "test["+strconv.Itoa(i)+"] evaluated.(*object.Quote).Node wrong")
+		assertions.AssertStringEquals(t, test.expected, evaluated.(*object.Quote).Node.String(), "test["+strconv.Itoa(i)+"] evaluated.(*object.Quote).Node.String() wrong")
 	}
 }

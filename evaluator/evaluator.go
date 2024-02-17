@@ -30,25 +30,23 @@ type (
 )
 
 type PrefixOperation struct {
-	right  object.Type
-	result object.Type
-	apply  PrefixFunc
+	right object.Type
+	apply PrefixFunc
 }
 type InfixOperation struct {
-	left   object.Type
-	right  object.Type
-	result object.Type
-	apply  InfixFunc
+	left  object.Type
+	right object.Type
+	apply InfixFunc
 }
 
 var operations = map[string][]Operation{
 	"!": {
-		&PrefixOperation{object.ANY, object.BOOLEAN, func(right object.Object) object.Object {
+		&PrefixOperation{object.ANY, func(right object.Object) object.Object {
 			return convertNativeBoolToBooleanObject(!isTruthy(right))
 		}},
 	},
 	"==": {
-		&InfixOperation{object.ANY, object.ANY, object.BOOLEAN, func(left, right object.Object) object.Object {
+		&InfixOperation{object.ANY, object.ANY, func(left, right object.Object) object.Object {
 			if left.Type() == object.NUMBER && right.Type() == object.NUMBER {
 				left := left.(*object.Number)
 				right := right.(*object.Number)
@@ -58,7 +56,7 @@ var operations = map[string][]Operation{
 		}},
 	},
 	"!=": {
-		&InfixOperation{object.ANY, object.ANY, object.BOOLEAN, func(left, right object.Object) object.Object {
+		&InfixOperation{object.ANY, object.ANY, func(left, right object.Object) object.Object {
 			if left.Type() == object.NUMBER && right.Type() == object.NUMBER {
 				left := left.(*object.Number)
 				right := right.(*object.Number)
@@ -68,38 +66,38 @@ var operations = map[string][]Operation{
 		}},
 	},
 	"+": {
-		&InfixOperation{object.NUMBER, object.NUMBER, object.NUMBER, func(left, right object.Object) object.Object {
+		&InfixOperation{object.NUMBER, object.NUMBER, func(left, right object.Object) object.Object {
 			return &object.Number{Value: left.(*object.Number).Value + right.(*object.Number).Value}
 		}},
-		&InfixOperation{object.STRING, object.STRING, object.STRING, func(left, right object.Object) object.Object {
+		&InfixOperation{object.STRING, object.STRING, func(left, right object.Object) object.Object {
 			return &object.String{Value: left.(*object.String).Value + right.(*object.String).Value}
 		}},
 	},
 	"-": {
-		&PrefixOperation{object.NUMBER, object.NUMBER, func(right object.Object) object.Object {
+		&PrefixOperation{object.NUMBER, func(right object.Object) object.Object {
 			return &object.Number{Value: -right.(*object.Number).Value}
 		}},
-		&InfixOperation{object.NUMBER, object.NUMBER, object.NUMBER, func(left, right object.Object) object.Object {
+		&InfixOperation{object.NUMBER, object.NUMBER, func(left, right object.Object) object.Object {
 			return &object.Number{Value: left.(*object.Number).Value - right.(*object.Number).Value}
 		}},
 	},
 	"*": {
-		&InfixOperation{object.NUMBER, object.NUMBER, object.NUMBER, func(left, right object.Object) object.Object {
+		&InfixOperation{object.NUMBER, object.NUMBER, func(left, right object.Object) object.Object {
 			return &object.Number{Value: left.(*object.Number).Value * right.(*object.Number).Value}
 		}},
 	},
 	"/": {
-		&InfixOperation{object.NUMBER, object.NUMBER, object.NUMBER, func(left, right object.Object) object.Object {
+		&InfixOperation{object.NUMBER, object.NUMBER, func(left, right object.Object) object.Object {
 			return &object.Number{Value: left.(*object.Number).Value / right.(*object.Number).Value}
 		}},
 	},
 	"<": {
-		&InfixOperation{object.NUMBER, object.NUMBER, object.BOOLEAN, func(left, right object.Object) object.Object {
+		&InfixOperation{object.NUMBER, object.NUMBER, func(left, right object.Object) object.Object {
 			return convertNativeBoolToBooleanObject(left.(*object.Number).Value < right.(*object.Number).Value)
 		}},
 	},
 	">": {
-		&InfixOperation{object.NUMBER, object.NUMBER, object.BOOLEAN, func(left, right object.Object) object.Object {
+		&InfixOperation{object.NUMBER, object.NUMBER, func(left, right object.Object) object.Object {
 			return convertNativeBoolToBooleanObject(left.(*object.Number).Value > right.(*object.Number).Value)
 		}},
 	},
@@ -228,7 +226,7 @@ func evalIdentifier(node *ast.Identifier, env *object.Environment) object.Object
 		return builtin
 	}
 
-	return errorf("identifier not found: " + node.Value)
+	return makeError("identifier not found: " + node.Value)
 }
 
 func evalNumberLiteral(node *ast.NumberLiteral) object.Object {
@@ -243,7 +241,7 @@ func evalPrefixExpression(node *ast.PrefixExpression, env *object.Environment) o
 
 	ops, ok := operations[node.Operator]
 	if !ok {
-		return errorf("unknown operator: %s%s", node.Operator, right.Type())
+		return makeError("unknown operator: %s%s", node.Operator, right.Type())
 	}
 
 	for _, op := range ops {
@@ -254,7 +252,7 @@ func evalPrefixExpression(node *ast.PrefixExpression, env *object.Environment) o
 			}
 		}
 	}
-	return errorf("unknown operator: %s%s", node.Operator, right.Type())
+	return makeError("unknown operator: %s%s", node.Operator, right.Type())
 }
 
 func evalInfixExpression(node *ast.InfixExpression, env *object.Environment) object.Object {
@@ -269,12 +267,12 @@ func evalInfixExpression(node *ast.InfixExpression, env *object.Environment) obj
 	}
 
 	if left.Type() != right.Type() {
-		return errorf("type mismatch: %s + %s", left.Type(), right.Type())
+		return makeError("type mismatch: %s + %s", left.Type(), right.Type())
 	}
 
 	ops, ok := operations[node.Operator]
 	if !ok {
-		return errorf("unknown operator: %s %s %s", left.Type(), node.Operator, right.Type())
+		return makeError("unknown operator: %s %s %s", left.Type(), node.Operator, right.Type())
 	}
 
 	for _, op := range ops {
@@ -285,7 +283,7 @@ func evalInfixExpression(node *ast.InfixExpression, env *object.Environment) obj
 			}
 		}
 	}
-	return errorf("unknown operator: %s %s %s", left.Type(), node.Operator, right.Type())
+	return makeError("unknown operator: %s %s %s", left.Type(), node.Operator, right.Type())
 }
 
 func evalGroupedExpression(node *ast.GroupedExpression, env *object.Environment) object.Object {
@@ -316,9 +314,10 @@ func evalFunctionLiteral(node *ast.FunctionLiteral, env *object.Environment) obj
 }
 
 func evalCallExpression(node *ast.CallExpression, env *object.Environment) object.Object {
-	if node.Function.TokenLexeme() == "quote" {
+	if isQuoteCall(node) {
 		return quote(node.Argument[0], env)
 	}
+
 	fn := Eval(node.Function, env)
 	if isError(fn) {
 		return fn
@@ -344,7 +343,7 @@ func call(fn object.Object, args []object.Object) object.Object {
 	case *object.Builtin:
 		return fn.Fn(args...)
 	default:
-		return errorf("not a function: %s", fn.Type())
+		return makeError("not a function: %s", fn.Type())
 	}
 }
 
@@ -386,7 +385,7 @@ func evalIndexExpression(node *ast.IndexExpression, env *object.Environment) obj
 
 		key, ok := index.(object.Hashable)
 		if !ok {
-			return errorf("unusable as hash key: %s", index.Type())
+			return makeError("unusable as hash key: %s", index.Type())
 		}
 
 		pair, ok := hash.Pairs[key.HashKey()]
@@ -396,7 +395,7 @@ func evalIndexExpression(node *ast.IndexExpression, env *object.Environment) obj
 
 		return pair.Value
 	default:
-		return errorf("index operator not supported: %s", left.Type())
+		return makeError("index operator not supported: %s", left.Type())
 	}
 }
 
@@ -411,7 +410,7 @@ func evalHashLiteral(node *ast.HashLiteral, env *object.Environment) object.Obje
 
 		hashKey, ok := key.(object.Hashable)
 		if !ok {
-			return errorf("unusable as hash key: %s", key.Type())
+			return makeError("unusable as hash key: %s", key.Type())
 		}
 
 		value := Eval(valueNode, env)
@@ -426,11 +425,11 @@ func evalHashLiteral(node *ast.HashLiteral, env *object.Environment) object.Obje
 	return &object.Hash{Pairs: pairs}
 }
 
-func evalExpressions(exps []ast.Expression, env *object.Environment) []object.Object {
+func evalExpressions(exprs []ast.Expression, env *object.Environment) []object.Object {
 	var result []object.Object
 
-	for _, e := range exps {
-		evaluated := Eval(e, env)
+	for _, expr := range exprs {
+		evaluated := Eval(expr, env)
 		if isError(evaluated) {
 			return []object.Object{evaluated}
 		}
@@ -468,6 +467,6 @@ func convertNativeBoolToBooleanObject(b bool) object.Object {
 	return FALSE
 }
 
-func errorf(format string, a ...any) *object.Error {
+func makeError(format string, a ...any) *object.Error {
 	return &object.Error{Message: fmt.Sprintf(format, a...)}
 }

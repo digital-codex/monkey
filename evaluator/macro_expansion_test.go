@@ -86,6 +86,8 @@ func TestExpandMacros(t *testing.T) {
 		input    string
 		expected string
 	}{
+		{`let print = macro(func, buf) { quote(unquote(func)(unquote(buf))); }; print(puts, "hello world");`, `puts("hello world")`},
+		{`let print = macro(condition, buf) { quote(if (unquote(condition)) { puts(unquote(buf)); }); }; print(true, "hello world");`, `if (true) { puts("hello world") }`},
 		{`let infix = macro() { quote(1 + 2); }; infix()`, `(1 + 2)`},
 		{`let reverse = macro(a, b) { quote(unquote(b) - unquote(a)); }; reverse(2 + 2, 10 - 5)`, `(10 - 5) - (2 + 2)`},
 		{`let unless = macro(condition, consequence, alternative) { quote(if (!(unquote(condition))) { unquote(consequence); } else { unquote(alternative); }); }; unless(10 > 5, puts("not greater"), puts("greater"));`, `if (!(10 > 5)) { puts("not greater") } else { puts("greater") }`},

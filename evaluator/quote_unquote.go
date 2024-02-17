@@ -36,6 +36,15 @@ func unquote(quoted ast.Node, env *object.Environment) ast.Node {
 	})
 }
 
+func isQuoteCall(node ast.Node) bool {
+	ce, ok := node.(*ast.CallExpression)
+	if !ok {
+		return false
+	}
+
+	return ce.Function.TokenLexeme() == "quote"
+}
+
 func isUnquotedCall(node ast.Node) bool {
 	ce, ok := node.(*ast.CallExpression)
 	if !ok {

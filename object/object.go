@@ -31,26 +31,42 @@ type Hashable interface {
  *                                  TYPES                                    *
  *****************************************************************************/
 
-type Type string
+type Type int
 
 const (
-	ANY          Type = "ANY"
-	NUMBER       Type = "NUMBER"
-	BOOLEAN      Type = "BOOLEAN"
-	NULL         Type = "NULL"
-	RETURN_VALUE Type = "RETURN_VALUE"
-	ERROR        Type = "ERROR"
-	FUNCTION     Type = "FUNCTION"
-	BUILTIN      Type = "BUILTIN"
-	STRING       Type = "STRING"
-	ARRAY        Type = "ARRAY"
-	HASH         Type = "HASH"
-	QUOTE        Type = "QUOTE"
-	MACRO        Type = "MACRO"
+	ANY Type = iota
+	NUMBER
+	BOOLEAN
+	NULL
+	RETURN_VALUE
+	ERROR
+	FUNCTION
+	BUILTIN
+	STRING
+	ARRAY
+	HASH
+	QUOTE
+	MACRO
 )
 
+var objects = [...]string{
+	ANY:          "ANY",
+	NUMBER:       "NUMBER",
+	BOOLEAN:      "BOOLEAN",
+	NULL:         "NULL",
+	RETURN_VALUE: "RETURN_VALUE",
+	ERROR:        "ERROR",
+	FUNCTION:     "FUNCTION",
+	BUILTIN:      "BUILTIN",
+	STRING:       "STRING",
+	ARRAY:        "ARRAY",
+	HASH:         "HASH",
+	QUOTE:        "QUOTE",
+	MACRO:        "MACRO",
+}
+
 func (t Type) String() string {
-	return string(t)
+	return objects[t]
 }
 
 type Number struct {
