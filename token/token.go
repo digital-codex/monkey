@@ -13,22 +13,23 @@ type Token struct {
 }
 
 const (
-	EOF = iota
+	EOF Type = iota
 
 	/*
 	 * Operators
 	 */
 	EQUAL
+	EQUAL_EQUAL
+	BANG
+	BANG_EQUAL
+
 	PLUS
 	MINUS
-	BANG
 	STAR
 	SLASH
 
 	LESS
 	MORE
-	EQUAL_EQUAL
-	BANG_EQUAL
 
 	/*
 	 * Delimiters

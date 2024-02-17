@@ -49,7 +49,7 @@ term        -> factor ( ( "-" | "+" ) factor )* ;
 factor      -> unary ( ( "/" | "*" ) unary )* ;
 
 unary       -> ( "!" | "-" ) unary | call ;
-call        -> index ( "(" arguments? ")" )* ;
+call        -> index ( "(" expressions? ")" )* ;
 index       -> primary "[" expression "]" ;
 primary     -> "true" 
              | "false" 
@@ -74,13 +74,12 @@ into a few reused helper rules.
 block       -> "{" declaration* "}" ;
 if          -> "if" "(" expression ")" block ( "else" block )? ;
 function    -> "fn" "(" parameters? ")" block ;
-array       -> "[" elements* "]" ;
+array       -> "[" expressions* "]" ;
 hash        -> "{" pair* "}" ;
 macro       -> "macro" "(" parameters? ")" block ;
 
 parameters  -> IDENTIFIER ( "," IDENTIFIER )* ;
-arguments   -> expression ( "," expression )* ;
-elements    -> expression ( "," expression )* ;
+expressions -> expression ( "," expression )* ;
 pair        -> expression ":" expression ( "," expression ":" expression )* ;
 ````
 

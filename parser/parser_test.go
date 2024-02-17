@@ -937,7 +937,7 @@ func testStatement(stmt ast.Statement) func(*testing.T, int, ast.Statement, ...a
 		return testReturnStatement
 	case *ast.ExpressionStatement:
 		return testExpressionStatement
-	case *ast.BlockStatement:
+	case *ast.Block:
 		return testBlockStatement
 	default:
 		panic(fmt.Sprintf("unsupported statement type: %T", stmt))
@@ -981,7 +981,7 @@ func testLetStatement(t *testing.T, i int, stmt ast.Statement, expected ...any) 
 	assertions.AssertTypeOf(t, reflect.TypeOf(ast.LetStatement{}), stmt, "test["+strconv.Itoa(i)+"] - ast.Statement unexpected type")
 	assertions.AssertStringEquals(t, "let", stmt.TokenLiteral(), "test["+strconv.Itoa(i)+"] - ast.Statement.TokenLiteral() wrong")
 	if 1 >= len(expected) {
-		t.Fatalf("testLetStatement: len(expected) wrong: expected=>1, actual=%d", len(expected))
+		t.Fatalf("testLetStatement: len(expect) wrong: expect=>1, actual=%d", len(expected))
 	}
 	testIdentifier(t, i, stmt.(*ast.LetStatement).Name, expected[0])
 	testExpression(stmt.(*ast.LetStatement).Value)(t, i, stmt.(*ast.LetStatement).Value, expected[1:]...)
@@ -991,7 +991,7 @@ func testReturnStatement(t *testing.T, i int, stmt ast.Statement, expected ...an
 	assertions.AssertTypeOf(t, reflect.TypeOf(ast.ReturnStatement{}), stmt, "test["+strconv.Itoa(i)+"] - ast.Statement unexpected type")
 	assertions.AssertStringEquals(t, "return", stmt.TokenLiteral(), "test["+strconv.Itoa(i)+"] - ast.Statement.TokenLiteral() wrong")
 	if 0 == len(expected) {
-		t.Fatalf("testReturnStatement: len(expected) wrong: expected=>0, actual=%d", len(expected))
+		t.Fatalf("testReturnStatement: len(expect) wrong: expect=>0, actual=%d", len(expected))
 	}
 	testExpression(stmt.(*ast.ReturnStatement).ReturnValue)(t, i, stmt.(*ast.ReturnStatement).ReturnValue, expected...)
 }
@@ -999,11 +999,11 @@ func testReturnStatement(t *testing.T, i int, stmt ast.Statement, expected ...an
 func testExpressionStatement(t *testing.T, i int, stmt ast.Statement, expected ...any) {
 	assertions.AssertTypeOf(t, reflect.TypeOf(ast.ExpressionStatement{}), stmt, "test["+strconv.Itoa(i)+"] - stmt unexpected type")
 	if 1 >= len(expected) {
-		t.Fatalf("testExpressionStatement: len(expected) wrong: expected=>1, actual=%d", len(expected))
+		t.Fatalf("testExpressionStatement: len(expect) wrong: expect=>1, actual=%d", len(expected))
 	}
 	literal, ok := expected[0].(string)
 	if !ok {
-		t.Fatalf("testExpressionStatement: expected[0] unexpected type: expected=string, actual=%T", expected[0])
+		t.Fatalf("testExpressionStatement: expect[0] unexpected type: expect=string, actual=%T", expected[0])
 	}
 	assertions.AssertStringEquals(t, literal, stmt.TokenLiteral(), "test["+strconv.Itoa(i)+"] - stmt.TokenLiteral() wrong")
 	testExpression(stmt.(*ast.ExpressionStatement).Expression)(t, i, stmt.(*ast.ExpressionStatement).Expression, expected[1:]...)
@@ -1013,20 +1013,20 @@ func testBlockStatement(t *testing.T, i int, stmt ast.Statement, expected ...any
 	assertions.AssertNotNull(t, stmt, "test["+strconv.Itoa(i)+"] - stmt is nil")
 	assertions.AssertStringEquals(t, "{", stmt.TokenLiteral(), "test["+strconv.Itoa(i)+"] - stmt.TokenLiteral() wrong")
 	if 0 == len(expected) {
-		t.Fatalf("testBlockStatement: len(expected) wrong: expected=>0, actual=%d", len(expected))
+		t.Fatalf("testBlockStatement: len(expect) wrong: expect=>0, actual=%d", len(expected))
 	}
-	assertions.AssertIntEquals(t, 1, len((stmt.(*ast.BlockStatement)).Statements), "test["+strconv.Itoa(i)+"] - block.Statements wrong")
-	testStatement(stmt.(*ast.BlockStatement).Statements[0])(t, i, stmt.(*ast.BlockStatement).Statements[0], expected...)
+	assertions.AssertIntEquals(t, 1, len((stmt.(*ast.Block)).Statements), "test["+strconv.Itoa(i)+"] - block.Statements wrong")
+	testStatement(stmt.(*ast.Block).Statements[0])(t, i, stmt.(*ast.Block).Statements[0], expected...)
 }
 
 func testIdentifier(t *testing.T, i int, exp ast.Expression, expected ...any) {
 	assertions.AssertTypeOf(t, reflect.TypeOf(&ast.Identifier{}), exp, "test["+strconv.Itoa(i)+"] - ast.Expression unexpected type")
 	if 1 != len(expected) {
-		t.Fatalf("testIdentifier: len(expected) wrong: expected=1, actual=%d", len(expected))
+		t.Fatalf("testIdentifier: len(expect) wrong: expect=1, actual=%d", len(expected))
 	}
 	value, ok := expected[0].(string)
 	if !ok {
-		t.Fatalf("testIdentifier: expected[0] unexpected type: expected=string, actual=%T", expected[0])
+		t.Fatalf("testIdentifier: expect[0] unexpected type: expect=string, actual=%T", expected[0])
 	}
 	assertions.AssertStringEquals(t, value, exp.(*ast.Identifier).TokenLiteral(), "test["+strconv.Itoa(i)+"] exp.(*ast.Identifier).TokenLiteral() wrong")
 	assertions.AssertStringEquals(t, value, exp.(*ast.Identifier).Value, "test["+strconv.Itoa(i)+"] exp.(*ast.Identifier).Value wrong")
@@ -1035,11 +1035,11 @@ func testIdentifier(t *testing.T, i int, exp ast.Expression, expected ...any) {
 func testIntegerLiteral(t *testing.T, i int, exp ast.Expression, expected ...any) {
 	assertions.AssertTypeOf(t, reflect.TypeOf(ast.IntegerLiteral{}), exp, "test["+strconv.Itoa(i)+"] - ast.Expression unexpected type")
 	if 1 != len(expected) {
-		t.Fatalf("testIntegerLiteral: len(expected) wrong: expected=1, actual=%d", len(expected))
+		t.Fatalf("testIntegerLiteral: len(expect) wrong: expect=1, actual=%d", len(expected))
 	}
 	value, ok := expected[0].(int)
 	if !ok {
-		t.Fatalf("testIntegerLiteral: expected[0] unexpected type: expected=int64, actual=%T", expected[0])
+		t.Fatalf("testIntegerLiteral: expect[0] unexpected type: expect=int64, actual=%T", expected[0])
 	}
 	assertions.AssertStringEquals(t, fmt.Sprintf("%d", value), exp.(*ast.IntegerLiteral).TokenLiteral(), "test["+strconv.Itoa(i)+"] exp.(*ast.IntegerLiteral).TokenLiteral() wrong")
 	assertions.AssertInt64Equals(t, int64(value), exp.(*ast.IntegerLiteral).Value, "test["+strconv.Itoa(i)+"] exp.(*ast.IntegerLiteral).Value wrong")
@@ -1048,11 +1048,11 @@ func testIntegerLiteral(t *testing.T, i int, exp ast.Expression, expected ...any
 func testPrefixExpression(t *testing.T, i int, exp ast.Expression, expected ...any) {
 	assertions.AssertTypeOf(t, reflect.TypeOf(ast.PrefixExpression{}), exp, "test["+strconv.Itoa(i)+"] - ast.Expression unexpected type")
 	if 2 != len(expected) {
-		t.Fatalf("testPrefixExpression: len(expected) wrong: expected=2, actual=%d", len(expected))
+		t.Fatalf("testPrefixExpression: len(expect) wrong: expect=2, actual=%d", len(expected))
 	}
 	operator, ok := expected[0].(string)
 	if !ok {
-		t.Fatalf("testPrefixExpression: expected[0] unexpected type: expected=string, actual=%T", expected[0])
+		t.Fatalf("testPrefixExpression: expect[0] unexpected type: expect=string, actual=%T", expected[0])
 	}
 	assertions.AssertStringEquals(t, operator, exp.(*ast.PrefixExpression).TokenLiteral(), "test["+strconv.Itoa(i)+"] exp.(*ast.PrefixExpression).TokenLiteral() wrong")
 	assertions.AssertStringEquals(t, operator, exp.(*ast.PrefixExpression).Operator, "test["+strconv.Itoa(i)+"] exp.(*ast.PrefixExpression).Operator wrong")
@@ -1062,11 +1062,11 @@ func testPrefixExpression(t *testing.T, i int, exp ast.Expression, expected ...a
 func testInfixExpression(t *testing.T, i int, exp ast.Expression, expected ...any) {
 	assertions.AssertTypeOf(t, reflect.TypeOf(ast.InfixExpression{}), exp, "test["+strconv.Itoa(i)+"] - ast.Expression unexpected type")
 	if 3 != len(expected) {
-		t.Fatalf("testInfixExpression: len(expected) wrong: expected=3, actual=%d", len(expected))
+		t.Fatalf("testInfixExpression: len(expect) wrong: expect=3, actual=%d", len(expected))
 	}
 	operator, ok := expected[1].(string)
 	if !ok {
-		t.Fatalf("testInfixExpression: expected[1] unexpected type: expected=string, actual=%T", expected[1])
+		t.Fatalf("testInfixExpression: expect[1] unexpected type: expect=string, actual=%T", expected[1])
 	}
 	assertions.AssertStringEquals(t, operator, exp.(*ast.InfixExpression).TokenLiteral(), "test["+strconv.Itoa(i)+"] exp.(*ast.InfixExpression).TokenLiteral() wrong")
 	assertions.AssertStringEquals(t, operator, exp.(*ast.InfixExpression).Operator, "test["+strconv.Itoa(i)+"] exp.(*ast.InfixExpression).Operator wrong")
@@ -1077,11 +1077,11 @@ func testInfixExpression(t *testing.T, i int, exp ast.Expression, expected ...an
 func testBoolean(t *testing.T, i int, exp ast.Expression, expected ...any) {
 	assertions.AssertTypeOf(t, reflect.TypeOf(ast.Boolean{}), exp, "test["+strconv.Itoa(i)+"] - ast.Expression unexpected type")
 	if 1 != len(expected) {
-		t.Fatalf("testBoolean: len(expected) wrong: expected=1, actual=%d", len(expected))
+		t.Fatalf("testBoolean: len(expect) wrong: expect=1, actual=%d", len(expected))
 	}
 	value, ok := expected[0].(bool)
 	if !ok {
-		t.Fatalf("testBoolean: expected[0] unexpected type: expected=bool, actual=%T", expected[0])
+		t.Fatalf("testBoolean: expect[0] unexpected type: expect=bool, actual=%T", expected[0])
 	}
 	assertions.AssertStringEquals(t, fmt.Sprintf("%t", value), exp.(*ast.Boolean).TokenLiteral(), "test["+strconv.Itoa(i)+"] exp.(*ast.Boolean).TokenLiteral() wrong")
 	assertions.AssertBoolEquals(t, value, exp.(*ast.Boolean).Value, "test["+strconv.Itoa(i)+"] exp.(*ast.Boolean).Value wrong")
@@ -1091,14 +1091,14 @@ func testIfExpression(t *testing.T, i int, exp ast.Expression, expected ...any) 
 	assertions.AssertTypeOf(t, reflect.TypeOf(ast.IfExpression{}), exp, "test["+strconv.Itoa(i)+"] - ast.Expression unexpected type")
 	assertions.AssertStringEquals(t, "if", exp.(*ast.IfExpression).TokenLiteral(), "test["+strconv.Itoa(i)+"] exp.(*ast.IfExpression).TokenLiteral() wrong")
 	if 5 != len(expected) {
-		t.Fatalf("testIfExpression: len(expected) wrong: expected=5, actual=%d", len(expected))
+		t.Fatalf("testIfExpression: len(expect) wrong: expect=5, actual=%d", len(expected))
 	}
 	consequence, ok := expected[3].(struct {
 		literal string
 		value   any
 	})
 	if !ok {
-		t.Fatalf("testIfExpression: expected[3] unexpected type: expected=struct{literal string; value any}, actual=%T", expected[3])
+		t.Fatalf("testIfExpression: expect[3] unexpected type: expect=struct{literal string; value any}, actual=%T", expected[3])
 	}
 	testExpression(exp.(*ast.IfExpression).Condition)(t, i, exp.(*ast.IfExpression).Condition, expected[0:3]...)
 	testBlockStatement(t, i, exp.(*ast.IfExpression).Consequence, consequence.literal, consequence.value)
@@ -1108,7 +1108,7 @@ func testIfExpression(t *testing.T, i int, exp ast.Expression, expected ...any) 
 			value   any
 		})
 		if !ok {
-			t.Fatalf("testIfExpression: expected[4] unexpected type: expected=struct{literal string; value any}, actual=%T", expected[4])
+			t.Fatalf("testIfExpression: expect[4] unexpected type: expect=struct{literal string; value any}, actual=%T", expected[4])
 		}
 		testBlockStatement(t, i, exp.(*ast.IfExpression).Alternative, alternative.literal, alternative.value)
 	}
@@ -1118,11 +1118,11 @@ func testFunctionLiteral(t *testing.T, i int, exp ast.Expression, expected ...an
 	assertions.AssertTypeOf(t, reflect.TypeOf(ast.FunctionLiteral{}), exp, "test["+strconv.Itoa(i)+"] - ast.Expression unexpected type")
 	assertions.AssertStringEquals(t, "fn", exp.(*ast.FunctionLiteral).TokenLiteral(), "test["+strconv.Itoa(i)+"] exp.(*ast.FunctionLiteral).TokenLiteral() wrong")
 	if 2 != len(expected) {
-		t.Fatalf("testFunctionLiteral: len(expected) wrong: expected=2, actual=%d", len(expected))
+		t.Fatalf("testFunctionLiteral: len(expect) wrong: expect=2, actual=%d", len(expected))
 	}
 	parameters, ok := expected[0].([]string)
 	if !ok {
-		t.Fatalf("testFunctionLiteral: expected[0] unexpected type: expected=[]string, actual=%T", expected[0])
+		t.Fatalf("testFunctionLiteral: expect[0] unexpected type: expect=[]string, actual=%T", expected[0])
 	}
 	for n, param := range parameters {
 		testIdentifier(t, i, exp.(*ast.FunctionLiteral).Parameters[n], param)
@@ -1134,7 +1134,7 @@ func testFunctionLiteral(t *testing.T, i int, exp ast.Expression, expected ...an
 		right    any
 	})
 	if !ok {
-		t.Fatalf("testFunctionLiteral: expected[1] unexpected type: expected=[]struct{literal string; left any; operator string; right any}, actual=%T", expected[1])
+		t.Fatalf("testFunctionLiteral: expect[1] unexpected type: expect=[]struct{literal string; left any; operator string; right any}, actual=%T", expected[1])
 	}
 	testBlockStatement(t, i, exp.(*ast.FunctionLiteral).Body, body.literal, body.left, body.operator, body.right)
 }
@@ -1143,7 +1143,7 @@ func testCallExpression(t *testing.T, i int, exp ast.Expression, expected ...any
 	assertions.AssertTypeOf(t, reflect.TypeOf(ast.CallExpression{}), exp, "test["+strconv.Itoa(i)+"] - ast.Expression unexpected type")
 	assertions.AssertStringEquals(t, "(", exp.(*ast.CallExpression).TokenLiteral(), "test["+strconv.Itoa(i)+"] exp.(*ast.CallExpression).TokenLiteral() wrong")
 	if 2 != len(expected) {
-		t.Fatalf("testCallExpression: len(expected) wrong: expected=2, actual=%d", len(expected))
+		t.Fatalf("testCallExpression: len(expect) wrong: expect=2, actual=%d", len(expected))
 	}
 	arguments, ok := expected[1].([]struct {
 		left     any
@@ -1151,7 +1151,7 @@ func testCallExpression(t *testing.T, i int, exp ast.Expression, expected ...any
 		right    any
 	})
 	if !ok {
-		t.Fatalf("testFunctionLiteral: expected[1] unexpected type: expected=[]struct{left any; operator string; right any}, actual=%T", expected[1])
+		t.Fatalf("testFunctionLiteral: expect[1] unexpected type: expect=[]struct{left any; operator string; right any}, actual=%T", expected[1])
 	}
 	testExpression(exp.(*ast.CallExpression).Function)(t, i, exp.(*ast.CallExpression).Function, expected[0])
 	for n, arg := range arguments {
@@ -1169,11 +1169,11 @@ func testCallExpression(t *testing.T, i int, exp ast.Expression, expected ...any
 func testStringLiteral(t *testing.T, i int, exp ast.Expression, expected ...any) {
 	assertions.AssertTypeOf(t, reflect.TypeOf(ast.StringLiteral{}), exp, "test["+strconv.Itoa(i)+"] - ast.Expression unexpected type")
 	if 1 != len(expected) {
-		t.Fatalf("testStringLiteral: len(expected) wrong: expected=1, actual=%d", len(expected))
+		t.Fatalf("testStringLiteral: len(expect) wrong: expect=1, actual=%d", len(expected))
 	}
 	value, ok := expected[0].(string)
 	if !ok {
-		t.Fatalf("testStringLiteral: expected[0] unexpected type: expected=string, actual=%T", expected[0])
+		t.Fatalf("testStringLiteral: expect[0] unexpected type: expect=string, actual=%T", expected[0])
 	}
 	assertions.AssertStringEquals(t, value, exp.(*ast.StringLiteral).TokenLiteral(), "test["+strconv.Itoa(i)+"] exp.(*ast.StringLiteral).TokenLiteral() wrong")
 	assertions.AssertStringEquals(t, value, exp.(*ast.StringLiteral).Value, "test["+strconv.Itoa(i)+"] exp.(*ast.StringLiteral).Value wrong")
@@ -1182,7 +1182,7 @@ func testStringLiteral(t *testing.T, i int, exp ast.Expression, expected ...any)
 func testArrayLiteral(t *testing.T, i int, exp ast.Expression, expected ...any) {
 	assertions.AssertTypeOf(t, reflect.TypeOf(ast.ArrayLiteral{}), exp, "test["+strconv.Itoa(i)+"] - ast.Expression unexpected type")
 	if 1 != len(expected) {
-		t.Fatalf("testArrayLiteral: len(expected) wrong: expected=1, actual=%d", len(expected))
+		t.Fatalf("testArrayLiteral: len(expect) wrong: expect=1, actual=%d", len(expected))
 	}
 	arguments, ok := expected[0].([]struct {
 		left     any
@@ -1190,7 +1190,7 @@ func testArrayLiteral(t *testing.T, i int, exp ast.Expression, expected ...any) 
 		right    any
 	})
 	if !ok {
-		t.Fatalf("testArrayLiteral: expected[0] unexpected type: expected=[]struct{left any; operator string; right any}, actual=%T", expected[0])
+		t.Fatalf("testArrayLiteral: expect[0] unexpected type: expect=[]struct{left any; operator string; right any}, actual=%T", expected[0])
 	}
 	for n, arg := range arguments {
 		switch {
@@ -1207,7 +1207,7 @@ func testArrayLiteral(t *testing.T, i int, exp ast.Expression, expected ...any) 
 func testIndexExpression(t *testing.T, i int, exp ast.Expression, expected ...any) {
 	assertions.AssertTypeOf(t, reflect.TypeOf(ast.IndexExpression{}), exp, "test["+strconv.Itoa(i)+"] - ast.Expression unexpected type")
 	if 2 != len(expected) {
-		t.Fatalf("testIndexExpression: len(expected) wrong: expected=2, actual=%d", len(expected))
+		t.Fatalf("testIndexExpression: len(expect) wrong: expect=2, actual=%d", len(expected))
 	}
 	index, ok := expected[1].(struct {
 		left     any
@@ -1215,7 +1215,7 @@ func testIndexExpression(t *testing.T, i int, exp ast.Expression, expected ...an
 		right    any
 	})
 	if !ok {
-		t.Fatalf("testIndexExpression: expected[1] unexpected type: expected=struct{left any; operator string; right any}, actual=%T", expected[1])
+		t.Fatalf("testIndexExpression: expect[1] unexpected type: expect=struct{left any; operator string; right any}, actual=%T", expected[1])
 	}
 	testExpression(exp.(*ast.IndexExpression).Left)(t, i, exp.(*ast.IndexExpression).Left, expected[0])
 	testExpression(exp.(*ast.IndexExpression).Index)(t, i, exp.(*ast.IndexExpression).Index, index.left, index.operator, index.right)
@@ -1224,7 +1224,7 @@ func testIndexExpression(t *testing.T, i int, exp ast.Expression, expected ...an
 func testHashLiteral(t *testing.T, i int, exp ast.Expression, expected ...any) {
 	assertions.AssertTypeOf(t, reflect.TypeOf(ast.HashLiteral{}), exp, "test["+strconv.Itoa(i)+"] - ast.Expression unexpected type")
 	if 1 != len(expected) {
-		t.Fatalf("testHashLiteral: len(expected) wrong: expected=1, actual=%d", len(expected))
+		t.Fatalf("testHashLiteral: len(expect) wrong: expect=1, actual=%d", len(expected))
 	}
 	pairs, ok := expected[0].(map[string]struct {
 		left     any
@@ -1232,7 +1232,7 @@ func testHashLiteral(t *testing.T, i int, exp ast.Expression, expected ...any) {
 		right    any
 	})
 	if !ok {
-		t.Fatalf("testHashLiteral: expected[0] unexpected type: expected=map[string]struct{left any; operator string; right any}, actual=%T", expected[0])
+		t.Fatalf("testHashLiteral: expect[0] unexpected type: expect=map[string]struct{left any; operator string; right any}, actual=%T", expected[0])
 	}
 	assertions.AssertIntEquals(t, len(pairs), len(exp.(*ast.HashLiteral).Pairs), "test["+strconv.Itoa(i)+"] - len(ast.(*ast.HashLiteral).Pairs) wrong")
 	for key, val := range exp.(*ast.HashLiteral).Pairs {
@@ -1254,11 +1254,11 @@ func testMacroLiteral(t *testing.T, i int, exp ast.Expression, expected ...any) 
 	assertions.AssertTypeOf(t, reflect.TypeOf(ast.MacroLiteral{}), exp, "test["+strconv.Itoa(i)+"] - ast.Expression unexpected type")
 	assertions.AssertStringEquals(t, "macro", exp.(*ast.MacroLiteral).TokenLiteral(), "test["+strconv.Itoa(i)+"] exp.(*ast.MacroLiteral).TokenLiteral() wrong")
 	if 2 != len(expected) {
-		t.Fatalf("testMacroLiteral: len(expected) wrong: expected=2, actual=%d", len(expected))
+		t.Fatalf("testMacroLiteral: len(expect) wrong: expect=2, actual=%d", len(expected))
 	}
 	parameters, ok := expected[0].([]string)
 	if !ok {
-		t.Fatalf("testMacroLiteral: expected[0] unexpected type: expected=[]string, actual=%T", expected[0])
+		t.Fatalf("testMacroLiteral: expect[0] unexpected type: expect=[]string, actual=%T", expected[0])
 	}
 	for n, param := range parameters {
 		testIdentifier(t, i, exp.(*ast.MacroLiteral).Parameters[n], param)
@@ -1270,13 +1270,13 @@ func testMacroLiteral(t *testing.T, i int, exp ast.Expression, expected ...any) 
 		right    any
 	})
 	if !ok {
-		t.Fatalf("testMacroLiteral: expected[1] unexpected type: expected=[]struct{literal string; left any; operator string; right any}, actual=%T", expected[1])
+		t.Fatalf("testMacroLiteral: expect[1] unexpected type: expect=[]struct{literal string; left any; operator string; right any}, actual=%T", expected[1])
 	}
 	testBlockStatement(t, i, exp.(*ast.MacroLiteral).Body, body.literal, body.left, body.operator, body.right)
 }
 
 func checkParserErrors(t *testing.T, p *Parser) {
-	if p.hadError {
+	if len(p.errors) > 0 {
 		errors := p.Errors()
 		t.Errorf("parser has %d errors", len(errors))
 		for _, msg := range errors {

@@ -75,10 +75,10 @@ func (l *Lexer) Next() token.Token {
 			return l.emit(token.PLUS)
 		case '-':
 			return l.emit(token.MINUS)
-		case '/':
-			return l.emit(token.SLASH)
 		case '*':
 			return l.emit(token.STAR)
+		case '/':
+			return l.emit(token.SLASH)
 		case '<':
 			return l.emit(token.LESS)
 		case '>':
@@ -125,7 +125,7 @@ func (l *Lexer) Next() token.Token {
 
 func (l *Lexer) ident() token.Token {
 	lit := l.read(isAlpha)
-	var t token.Type = token.IDENT
+	t := token.IDENT
 	if tt, ok := keywords[lit]; ok {
 		t = tt
 	}

@@ -87,7 +87,7 @@ func (e *Error) Inspect() string {
 
 type Function struct {
 	Parameters []*ast.Identifier
-	Body       *ast.BlockStatement
+	Body       *ast.Block
 	Env        *Environment
 }
 
@@ -232,7 +232,7 @@ func (q *Quote) Inspect() string {
 
 type Macro struct {
 	Parameters []*ast.Identifier
-	Body       *ast.BlockStatement
+	Body       *ast.Block
 	Env        *Environment
 }
 

@@ -49,7 +49,7 @@ type ExpressionStatement struct {
 	Expression Expression
 }
 
-type BlockStatement struct {
+type Block struct {
 	Token      token.Token
 	Statements []Statement
 }
@@ -85,14 +85,14 @@ type Boolean struct {
 type IfExpression struct {
 	Token       token.Token // The 'if' token
 	Condition   Expression
-	Consequence *BlockStatement
-	Alternative *BlockStatement
+	Consequence *Block
+	Alternative *Block
 }
 
 type FunctionLiteral struct {
 	Token      token.Token // The 'fn' token
 	Parameters []*Identifier
-	Body       *BlockStatement
+	Body       *Block
 }
 
 type CallExpression struct {
@@ -125,7 +125,7 @@ type HashLiteral struct {
 type MacroLiteral struct {
 	Token      token.Token // the 'macro' token
 	Parameters []*Identifier
-	Body       *BlockStatement
+	Body       *Block
 }
 
 /*****************************************************************************
@@ -156,7 +156,7 @@ func (p *Program) String() string {
 func (ls *LetStatement) statementNode()        {}
 func (rs *ReturnStatement) statementNode()     {}
 func (es *ExpressionStatement) statementNode() {}
-func (bs *BlockStatement) statementNode()      {}
+func (bs *Block) statementNode()               {}
 
 func (ls *LetStatement) TokenLiteral() string {
 	return ls.Token.Lexeme
@@ -167,7 +167,7 @@ func (rs *ReturnStatement) TokenLiteral() string {
 func (es *ExpressionStatement) TokenLiteral() string {
 	return es.Token.Lexeme
 }
-func (bs *BlockStatement) TokenLiteral() string {
+func (bs *Block) TokenLiteral() string {
 	return bs.Token.Lexeme
 }
 
@@ -206,7 +206,7 @@ func (es *ExpressionStatement) String() string {
 
 	return ""
 }
-func (bs *BlockStatement) String() string {
+func (bs *Block) String() string {
 	var out bytes.Buffer
 
 	for _, s := range bs.Statements {

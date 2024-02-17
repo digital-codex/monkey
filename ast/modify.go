@@ -20,11 +20,11 @@ func Modify(node Node, modifier ModifierFunc) Node {
 		node.Index, _ = Modify(node.Index, modifier).(Expression)
 	case *IfExpression:
 		node.Condition, _ = Modify(node.Condition, modifier).(Expression)
-		node.Consequence, _ = Modify(node.Consequence, modifier).(*BlockStatement)
+		node.Consequence, _ = Modify(node.Consequence, modifier).(*Block)
 		if node.Alternative != nil {
-			node.Alternative, _ = Modify(node.Alternative, modifier).(*BlockStatement)
+			node.Alternative, _ = Modify(node.Alternative, modifier).(*Block)
 		}
-	case *BlockStatement:
+	case *Block:
 		for i, statement := range node.Statements {
 			node.Statements[i], _ = Modify(statement, modifier).(Statement)
 		}
@@ -36,7 +36,7 @@ func Modify(node Node, modifier ModifierFunc) Node {
 		for i, param := range node.Parameters {
 			node.Parameters[i], _ = Modify(param, modifier).(*Identifier)
 		}
-		node.Body, _ = Modify(node.Body, modifier).(*BlockStatement)
+		node.Body, _ = Modify(node.Body, modifier).(*Block)
 	case *ArrayLiteral:
 		for i, elem := range node.Elements {
 			node.Elements[i], _ = Modify(elem, modifier).(Expression)

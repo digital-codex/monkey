@@ -19,7 +19,7 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 		return evalProgram(node, env)
 	case *ast.ExpressionStatement:
 		return Eval(node.Expression, env)
-	case *ast.BlockStatement:
+	case *ast.Block:
 		return evalBlockStatements(node, env)
 	case *ast.ReturnStatement:
 		val := Eval(node.ReturnValue, env)
@@ -123,7 +123,7 @@ func evalProgram(program *ast.Program, env *object.Environment) object.Object {
 	return result
 }
 
-func evalBlockStatements(block *ast.BlockStatement, env *object.Environment) object.Object {
+func evalBlockStatements(block *ast.Block, env *object.Environment) object.Object {
 	var result object.Object
 
 	for _, statement := range block.Statements {

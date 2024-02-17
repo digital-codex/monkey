@@ -1,7 +1,7 @@
 package main
 
 import (
-	"monkey/repl"
+	"github.com/digital-codex/monkey/repl"
 	"os"
 	"os/user"
 )

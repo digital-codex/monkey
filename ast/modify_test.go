@@ -54,13 +54,13 @@ func TestModify(t *testing.T) {
 		{
 			&IfExpression{
 				Condition:   one(),
-				Consequence: &BlockStatement{Statements: []Statement{&ExpressionStatement{Expression: one()}}},
-				Alternative: &BlockStatement{Statements: []Statement{&ExpressionStatement{Expression: one()}}},
+				Consequence: &Block{Statements: []Statement{&ExpressionStatement{Expression: one()}}},
+				Alternative: &Block{Statements: []Statement{&ExpressionStatement{Expression: one()}}},
 			},
 			&IfExpression{
 				Condition:   two(),
-				Consequence: &BlockStatement{Statements: []Statement{&ExpressionStatement{Expression: two()}}},
-				Alternative: &BlockStatement{Statements: []Statement{&ExpressionStatement{Expression: two()}}},
+				Consequence: &Block{Statements: []Statement{&ExpressionStatement{Expression: two()}}},
+				Alternative: &Block{Statements: []Statement{&ExpressionStatement{Expression: two()}}},
 			},
 		},
 		{
@@ -74,11 +74,11 @@ func TestModify(t *testing.T) {
 		{
 			&FunctionLiteral{
 				Parameters: []*Identifier{},
-				Body:       &BlockStatement{Statements: []Statement{&ExpressionStatement{Expression: one()}}},
+				Body:       &Block{Statements: []Statement{&ExpressionStatement{Expression: one()}}},
 			},
 			&FunctionLiteral{
 				Parameters: []*Identifier{},
-				Body:       &BlockStatement{Statements: []Statement{&ExpressionStatement{Expression: two()}}},
+				Body:       &Block{Statements: []Statement{&ExpressionStatement{Expression: two()}}},
 			},
 		},
 		{
