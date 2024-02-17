@@ -60,13 +60,13 @@ const (
 	 * Keywords
 	 */
 	FN
+	IF
 	LET
+	ELSE
 	TRUE
 	FALSE
-	IF
-	ELSE
-	RETURN
 	MACRO
+	RETURN
 
 	EOF
 )
@@ -77,17 +77,18 @@ var lexemes = [...]string{
 	/*
 	 * Operators
 	 */
-	EQUAL: "=",
+	EQUAL:       "=",
+	EQUAL_EQUAL: "==",
+	BANG:        "!",
+	BANG_EQUAL:  "!=",
+
 	PLUS:  "+",
 	MINUS: "-",
-	BANG:  "!",
 	STAR:  "*",
 	SLASH: "/",
 
-	LESS:        "<",
-	MORE:        ">",
-	EQUAL_EQUAL: "==",
-	BANG_EQUAL:  "!=",
+	LESS: "<",
+	MORE: ">",
 
 	/*
 	 * Delimiters
@@ -106,21 +107,21 @@ var lexemes = [...]string{
 	/*
 	 * Identifiers + lexemes
 	 */
+	STRING: "STRING",
 	IDENT:  "IDENT",
 	NUMBER: "NUMBER",
-	STRING: "STRING",
 
 	/*
 	 * Keywords
 	 */
 	FN:     "fn",
+	IF:     "if",
 	LET:    "let",
+	ELSE:   "else",
 	TRUE:   "true",
 	FALSE:  "false",
-	IF:     "if",
-	ELSE:   "else",
-	RETURN: "return",
 	MACRO:  "macro",
+	RETURN: "return",
 
 	EOF: "",
 }

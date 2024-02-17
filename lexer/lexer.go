@@ -20,8 +20,6 @@ const (
 	UNTERMINATED_STRING  Error = "unterminated string"
 )
 
-type Predicate func(byte) bool
-
 type Lexer struct {
 	source string
 
@@ -36,13 +34,13 @@ type Lexer struct {
 
 var keywords = map[string]token.Type{
 	"fn":     token.FN,
+	"if":     token.IF,
 	"let":    token.LET,
+	"else":   token.ELSE,
 	"true":   token.TRUE,
 	"false":  token.FALSE,
-	"if":     token.IF,
-	"else":   token.ELSE,
-	"return": token.RETURN,
 	"macro":  token.MACRO,
+	"return": token.RETURN,
 }
 
 /*****************************************************************************
@@ -159,7 +157,7 @@ func (l *Lexer) unexpected() token.Token {
 	return tok
 }
 
-func (l *Lexer) skip(condition Predicate) {
+func (l *Lexer) skip(condition func(byte) bool) {
 	for ch := l.peek(0); condition(ch); ch = l.peek(0) {
 		if ch == '\n' {
 			l.line++
@@ -168,7 +166,7 @@ func (l *Lexer) skip(condition Predicate) {
 	}
 }
 
-func (l *Lexer) read(condition Predicate) string {
+func (l *Lexer) read(condition func(byte) bool) string {
 	for condition(l.peek(0)) {
 		l.consume()
 	}

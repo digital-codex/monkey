@@ -59,7 +59,7 @@ type Identifier struct {
 	Value string
 }
 
-type IntegerLiteral struct {
+type NumberLiteral struct {
 	Token token.Token // The token.NUMBER token
 	Value int64
 }
@@ -226,7 +226,7 @@ func (bs *Block) String() string {
  *****************************************************************************/
 
 func (i *Identifier) expressionNode()         {}
-func (il *IntegerLiteral) expressionNode()    {}
+func (il *NumberLiteral) expressionNode()     {}
 func (pe *PrefixExpression) expressionNode()  {}
 func (ie *InfixExpression) expressionNode()   {}
 func (ge *GroupedExpression) expressionNode() {}
@@ -243,7 +243,7 @@ func (ml *MacroLiteral) expressionNode()      {}
 func (i *Identifier) TokenLexeme() string {
 	return i.Token.Lexeme
 }
-func (il *IntegerLiteral) TokenLexeme() string {
+func (il *NumberLiteral) TokenLexeme() string {
 	return il.Token.Lexeme
 }
 func (pe *PrefixExpression) TokenLexeme() string {
@@ -286,7 +286,7 @@ func (ml *MacroLiteral) TokenLexeme() string {
 func (i *Identifier) String() string {
 	return i.Value
 }
-func (il *IntegerLiteral) String() string {
+func (il *NumberLiteral) String() string {
 	return il.Token.Lexeme
 }
 func (pe *PrefixExpression) String() string {
@@ -320,13 +320,11 @@ func (ie *IfExpression) String() string {
 	var out bytes.Buffer
 
 	out.WriteString("if")
-	out.WriteString("(")
-	out.WriteString(ie.Condition.String())
-	out.WriteString(")")
-	out.WriteString(" { " + ie.Consequence.String() + " }")
+	out.WriteString("(" + ie.Condition.String() + ")")
+	out.WriteString("{" + ie.Consequence.String() + "}")
 	if ie.Alternative != nil {
 		out.WriteString("else")
-		out.WriteString(" { " + ie.Alternative.String() + " }")
+		out.WriteString("{" + ie.Alternative.String() + "}")
 	}
 
 	return out.String()
@@ -340,10 +338,8 @@ func (fl *FunctionLiteral) String() string {
 	}
 
 	out.WriteString(fl.TokenLexeme())
-	out.WriteString("(")
-	out.WriteString(strings.Join(params, ", "))
-	out.WriteString(")")
-	out.WriteString(" { " + fl.Body.String() + " }")
+	out.WriteString("(" + strings.Join(params, ", ") + ")")
+	out.WriteString("{" + fl.Body.String() + "}")
 
 	return out.String()
 }
@@ -372,9 +368,7 @@ func (al *ArrayLiteral) String() string {
 		elems = append(elems, e.String())
 	}
 
-	out.WriteString("[")
-	out.WriteString(strings.Join(elems, ", "))
-	out.WriteString("]")
+	out.WriteString("[" + strings.Join(elems, ", ") + "]")
 
 	return out.String()
 }
@@ -383,9 +377,8 @@ func (ie *IndexExpression) String() string {
 
 	out.WriteString("(")
 	out.WriteString(ie.Left.String())
-	out.WriteString("[")
-	out.WriteString(ie.Index.String())
-	out.WriteString("])")
+	out.WriteString("[" + ie.Index.String() + "]")
+	out.WriteString(")")
 
 	return out.String()
 }
@@ -397,9 +390,7 @@ func (hl *HashLiteral) String() string {
 		pairs = append(pairs, key.String()+":"+value.String())
 	}
 
-	out.WriteString("{")
-	out.WriteString(strings.Join(pairs, ", "))
-	out.WriteString("}")
+	out.WriteString("{" + strings.Join(pairs, ", ") + "}")
 
 	return out.String()
 }
@@ -412,9 +403,7 @@ func (ml *MacroLiteral) String() string {
 	}
 
 	out.WriteString(ml.TokenLexeme())
-	out.WriteString("(")
-	out.WriteString(strings.Join(params, ", "))
-	out.WriteString(")")
+	out.WriteString("(" + strings.Join(params, ", ") + ")")
 	out.WriteString("{" + ml.Body.String() + "}")
 
 	return out.String()

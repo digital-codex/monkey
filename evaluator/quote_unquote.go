@@ -7,11 +7,16 @@ import (
 	"github.com/digital-codex/monkey/token"
 )
 
+/*****************************************************************************
+ *                             PRIVATE FUNCTIONS                             *
+ *****************************************************************************/
+
 func quote(node ast.Node, env *object.Environment) object.Object {
 	node = condense(node, env)
 	return &object.Quote{Node: node}
 }
 
+// TODO: change name 'evalUnquoteCall'
 func condense(quoted ast.Node, env *object.Environment) ast.Node {
 	return ast.Modify(quoted, func(node ast.Node) ast.Node {
 		if !isUnquotedCall(node) {
@@ -43,8 +48,8 @@ func isUnquotedCall(node ast.Node) bool {
 
 func convert(obj object.Object) ast.Node {
 	switch obj := obj.(type) {
-	case *object.Integer:
-		return &ast.IntegerLiteral{Token: token.Token{Type: token.NUMBER, Lexeme: fmt.Sprintf("%d", obj.Value)}, Value: obj.Value}
+	case *object.Number:
+		return &ast.NumberLiteral{Token: token.Token{Type: token.NUMBER, Lexeme: fmt.Sprintf("%d", obj.Value)}, Value: obj.Value}
 	case *object.Boolean:
 		var t token.Token
 		if obj.Value {

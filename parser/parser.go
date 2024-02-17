@@ -24,13 +24,13 @@ const (
 )
 
 type (
-	PrefixParseFn func() ast.Expression
-	InfixParseFn  func(expression ast.Expression) ast.Expression
+	PrefixParseFunc func() ast.Expression
+	InfixParseFunc  func(expression ast.Expression) ast.Expression
 )
 
 type Rule struct {
-	prefix     PrefixParseFn
-	infix      InfixParseFn
+	prefix     PrefixParseFunc
+	infix      InfixParseFunc
 	precedence Precedence
 }
 
@@ -90,7 +90,7 @@ func New(l *lexer.Lexer) *Parser {
 	p.registerRule(token.LBRACKET, p.parseArrayLiteral, p.parseIndexExpression, INDEX)
 
 	p.registerRule(token.IDENT, p.parseIdentifier, nil, NONE)
-	p.registerRule(token.NUMBER, p.parseIntegerLiteral, nil, NONE)
+	p.registerRule(token.NUMBER, p.parseNumberLiteral, nil, NONE)
 	p.registerRule(token.STRING, p.parseStringLiteral, nil, NONE)
 
 	p.registerRule(token.FN, p.parseFunctionLiteral, nil, NONE)
@@ -234,8 +234,8 @@ func (p *Parser) parseIdentifier() ast.Expression {
 	return &ast.Identifier{Token: p.current, Value: p.current.Lexeme}
 }
 
-func (p *Parser) parseIntegerLiteral() ast.Expression {
-	expr := &ast.IntegerLiteral{Token: p.current}
+func (p *Parser) parseNumberLiteral() ast.Expression {
+	expr := &ast.NumberLiteral{Token: p.current}
 
 	value, err := strconv.ParseInt(p.current.Lexeme, 0, 64)
 	if err != nil {
@@ -484,7 +484,7 @@ func (p *Parser) rule(t token.Type) Rule {
 	return p.rules[t]
 }
 
-func (p *Parser) registerRule(t token.Type, prefix PrefixParseFn, infix InfixParseFn, precedence Precedence) {
+func (p *Parser) registerRule(t token.Type, prefix PrefixParseFunc, infix InfixParseFunc, precedence Precedence) {
 	p.rules[t] = Rule{prefix, infix, precedence}
 }
 

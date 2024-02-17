@@ -20,9 +20,9 @@ func TestModify(t *testing.T) {
 				node     Node
 				modifier Modifier
 			}{
-				node: &IntegerLiteral{Value: 1},
+				node: &NumberLiteral{Value: 1},
 				modifier: func(node Node) Node {
-					integer, ok := node.(*IntegerLiteral)
+					integer, ok := node.(*NumberLiteral)
 					if !ok {
 						return node
 					}
@@ -36,7 +36,7 @@ func TestModify(t *testing.T) {
 
 				},
 			},
-			expected: &IntegerLiteral{Value: 2},
+			expected: &NumberLiteral{Value: 2},
 		},
 		{
 			input: struct {
@@ -44,10 +44,10 @@ func TestModify(t *testing.T) {
 				modifier Modifier
 			}{
 				node: &Program{
-					Statements: []Statement{&ExpressionStatement{Expression: &IntegerLiteral{Value: 1}}},
+					Statements: []Statement{&ExpressionStatement{Expression: &NumberLiteral{Value: 1}}},
 				},
 				modifier: func(node Node) Node {
-					integer, ok := node.(*IntegerLiteral)
+					integer, ok := node.(*NumberLiteral)
 					if !ok {
 						return node
 					}
@@ -62,7 +62,7 @@ func TestModify(t *testing.T) {
 				},
 			},
 			expected: &Program{
-				Statements: []Statement{&ExpressionStatement{Expression: &IntegerLiteral{Value: 2}}},
+				Statements: []Statement{&ExpressionStatement{Expression: &NumberLiteral{Value: 2}}},
 			},
 		},
 		{
@@ -70,9 +70,9 @@ func TestModify(t *testing.T) {
 				node     Node
 				modifier Modifier
 			}{
-				node: &InfixExpression{Left: &IntegerLiteral{Value: 1}, Operator: "+", Right: &IntegerLiteral{Value: 2}},
+				node: &InfixExpression{Left: &NumberLiteral{Value: 1}, Operator: "+", Right: &NumberLiteral{Value: 2}},
 				modifier: func(node Node) Node {
-					integer, ok := node.(*IntegerLiteral)
+					integer, ok := node.(*NumberLiteral)
 					if !ok {
 						return node
 					}
@@ -86,16 +86,16 @@ func TestModify(t *testing.T) {
 
 				},
 			},
-			expected: &InfixExpression{Left: &IntegerLiteral{Value: 2}, Operator: "+", Right: &IntegerLiteral{Value: 2}},
+			expected: &InfixExpression{Left: &NumberLiteral{Value: 2}, Operator: "+", Right: &NumberLiteral{Value: 2}},
 		},
 		{
 			input: struct {
 				node     Node
 				modifier Modifier
 			}{
-				node: &InfixExpression{Left: &IntegerLiteral{Value: 2}, Operator: "+", Right: &IntegerLiteral{Value: 1}},
+				node: &InfixExpression{Left: &NumberLiteral{Value: 2}, Operator: "+", Right: &NumberLiteral{Value: 1}},
 				modifier: func(node Node) Node {
-					integer, ok := node.(*IntegerLiteral)
+					integer, ok := node.(*NumberLiteral)
 					if !ok {
 						return node
 					}
@@ -109,16 +109,16 @@ func TestModify(t *testing.T) {
 
 				},
 			},
-			expected: &InfixExpression{Left: &IntegerLiteral{Value: 2}, Operator: "+", Right: &IntegerLiteral{Value: 2}},
+			expected: &InfixExpression{Left: &NumberLiteral{Value: 2}, Operator: "+", Right: &NumberLiteral{Value: 2}},
 		},
 		{
 			input: struct {
 				node     Node
 				modifier Modifier
 			}{
-				node: &PrefixExpression{Operator: "+", Right: &IntegerLiteral{Value: 1}},
+				node: &PrefixExpression{Operator: "+", Right: &NumberLiteral{Value: 1}},
 				modifier: func(node Node) Node {
-					integer, ok := node.(*IntegerLiteral)
+					integer, ok := node.(*NumberLiteral)
 					if !ok {
 						return node
 					}
@@ -132,16 +132,16 @@ func TestModify(t *testing.T) {
 
 				},
 			},
-			expected: &PrefixExpression{Operator: "+", Right: &IntegerLiteral{Value: 2}},
+			expected: &PrefixExpression{Operator: "+", Right: &NumberLiteral{Value: 2}},
 		},
 		{
 			input: struct {
 				node     Node
 				modifier Modifier
 			}{
-				node: &IndexExpression{Left: &IntegerLiteral{Value: 1}, Index: &IntegerLiteral{Value: 1}},
+				node: &IndexExpression{Left: &NumberLiteral{Value: 1}, Index: &NumberLiteral{Value: 1}},
 				modifier: func(node Node) Node {
-					integer, ok := node.(*IntegerLiteral)
+					integer, ok := node.(*NumberLiteral)
 					if !ok {
 						return node
 					}
@@ -155,7 +155,7 @@ func TestModify(t *testing.T) {
 
 				},
 			},
-			expected: &IndexExpression{Left: &IntegerLiteral{Value: 2}, Index: &IntegerLiteral{Value: 2}},
+			expected: &IndexExpression{Left: &NumberLiteral{Value: 2}, Index: &NumberLiteral{Value: 2}},
 		},
 		{
 			input: struct {
@@ -163,12 +163,12 @@ func TestModify(t *testing.T) {
 				modifier Modifier
 			}{
 				node: &IfExpression{
-					Condition:   &IntegerLiteral{Value: 1},
-					Consequence: &Block{Statements: []Statement{&ExpressionStatement{Expression: &IntegerLiteral{Value: 1}}}},
-					Alternative: &Block{Statements: []Statement{&ExpressionStatement{Expression: &IntegerLiteral{Value: 1}}}},
+					Condition:   &NumberLiteral{Value: 1},
+					Consequence: &Block{Statements: []Statement{&ExpressionStatement{Expression: &NumberLiteral{Value: 1}}}},
+					Alternative: &Block{Statements: []Statement{&ExpressionStatement{Expression: &NumberLiteral{Value: 1}}}},
 				},
 				modifier: func(node Node) Node {
-					integer, ok := node.(*IntegerLiteral)
+					integer, ok := node.(*NumberLiteral)
 					if !ok {
 						return node
 					}
@@ -183,9 +183,9 @@ func TestModify(t *testing.T) {
 				},
 			},
 			expected: &IfExpression{
-				Condition:   &IntegerLiteral{Value: 2},
-				Consequence: &Block{Statements: []Statement{&ExpressionStatement{Expression: &IntegerLiteral{Value: 2}}}},
-				Alternative: &Block{Statements: []Statement{&ExpressionStatement{Expression: &IntegerLiteral{Value: 2}}}},
+				Condition:   &NumberLiteral{Value: 2},
+				Consequence: &Block{Statements: []Statement{&ExpressionStatement{Expression: &NumberLiteral{Value: 2}}}},
+				Alternative: &Block{Statements: []Statement{&ExpressionStatement{Expression: &NumberLiteral{Value: 2}}}},
 			},
 		},
 		{
@@ -193,9 +193,9 @@ func TestModify(t *testing.T) {
 				node     Node
 				modifier Modifier
 			}{
-				node: &ReturnStatement{ReturnValue: &IntegerLiteral{Value: 1}},
+				node: &ReturnStatement{ReturnValue: &NumberLiteral{Value: 1}},
 				modifier: func(node Node) Node {
-					integer, ok := node.(*IntegerLiteral)
+					integer, ok := node.(*NumberLiteral)
 					if !ok {
 						return node
 					}
@@ -209,16 +209,16 @@ func TestModify(t *testing.T) {
 
 				},
 			},
-			expected: &ReturnStatement{ReturnValue: &IntegerLiteral{Value: 2}},
+			expected: &ReturnStatement{ReturnValue: &NumberLiteral{Value: 2}},
 		},
 		{
 			input: struct {
 				node     Node
 				modifier Modifier
 			}{
-				node: &LetStatement{Value: &IntegerLiteral{Value: 1}},
+				node: &LetStatement{Value: &NumberLiteral{Value: 1}},
 				modifier: func(node Node) Node {
-					integer, ok := node.(*IntegerLiteral)
+					integer, ok := node.(*NumberLiteral)
 					if !ok {
 						return node
 					}
@@ -232,7 +232,7 @@ func TestModify(t *testing.T) {
 
 				},
 			},
-			expected: &LetStatement{Value: &IntegerLiteral{Value: 2}},
+			expected: &LetStatement{Value: &NumberLiteral{Value: 2}},
 		},
 		{
 			input: struct {
@@ -241,10 +241,10 @@ func TestModify(t *testing.T) {
 			}{
 				node: &FunctionLiteral{
 					Parameters: []*Identifier{},
-					Body:       &Block{Statements: []Statement{&ExpressionStatement{Expression: &IntegerLiteral{Value: 1}}}},
+					Body:       &Block{Statements: []Statement{&ExpressionStatement{Expression: &NumberLiteral{Value: 1}}}},
 				},
 				modifier: func(node Node) Node {
-					integer, ok := node.(*IntegerLiteral)
+					integer, ok := node.(*NumberLiteral)
 					if !ok {
 						return node
 					}
@@ -260,7 +260,7 @@ func TestModify(t *testing.T) {
 			},
 			expected: &FunctionLiteral{
 				Parameters: []*Identifier{},
-				Body:       &Block{Statements: []Statement{&ExpressionStatement{Expression: &IntegerLiteral{Value: 2}}}},
+				Body:       &Block{Statements: []Statement{&ExpressionStatement{Expression: &NumberLiteral{Value: 2}}}},
 			},
 		},
 		{
@@ -269,10 +269,10 @@ func TestModify(t *testing.T) {
 				modifier Modifier
 			}{
 				node: &ArrayLiteral{
-					Elements: []Expression{&IntegerLiteral{Value: 1}, &IntegerLiteral{Value: 1}},
+					Elements: []Expression{&NumberLiteral{Value: 1}, &NumberLiteral{Value: 1}},
 				},
 				modifier: func(node Node) Node {
-					integer, ok := node.(*IntegerLiteral)
+					integer, ok := node.(*NumberLiteral)
 					if !ok {
 						return node
 					}
@@ -287,7 +287,7 @@ func TestModify(t *testing.T) {
 				},
 			},
 			expected: &ArrayLiteral{
-				Elements: []Expression{&IntegerLiteral{Value: 2}, &IntegerLiteral{Value: 2}},
+				Elements: []Expression{&NumberLiteral{Value: 2}, &NumberLiteral{Value: 2}},
 			},
 		},
 		{
@@ -297,12 +297,12 @@ func TestModify(t *testing.T) {
 			}{
 				node: &HashLiteral{
 					Pairs: map[Expression]Expression{
-						&IntegerLiteral{Value: 1}: &IntegerLiteral{Value: 1},
-						&IntegerLiteral{Value: 1}: &IntegerLiteral{Value: 1},
+						&NumberLiteral{Value: 1}: &NumberLiteral{Value: 1},
+						&NumberLiteral{Value: 1}: &NumberLiteral{Value: 1},
 					},
 				},
 				modifier: func(node Node) Node {
-					integer, ok := node.(*IntegerLiteral)
+					integer, ok := node.(*NumberLiteral)
 					if !ok {
 						return node
 					}
@@ -318,8 +318,8 @@ func TestModify(t *testing.T) {
 			},
 			expected: &HashLiteral{
 				Pairs: map[Expression]Expression{
-					&IntegerLiteral{Value: 2}: &IntegerLiteral{Value: 2},
-					&IntegerLiteral{Value: 2}: &IntegerLiteral{Value: 2},
+					&NumberLiteral{Value: 2}: &NumberLiteral{Value: 2},
+					&NumberLiteral{Value: 2}: &NumberLiteral{Value: 2},
 				},
 			},
 		},

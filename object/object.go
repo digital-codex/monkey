@@ -29,21 +29,26 @@ type Hashable interface {
 type Type string
 
 const (
-	INTEGER      = "INTEGER"
-	BOOLEAN      = "BOOLEAN"
-	NULL         = "NULL"
-	RETURN_VALUE = "RETURN_VALUE"
-	ERROR        = "ERROR"
-	FUNCTION     = "FUNCTION"
-	BUILTIN      = "BUILTIN"
-	STRING       = "STRING"
-	ARRAY        = "ARRAY"
-	HASH         = "HASH"
-	QUOTE        = "QUOTE"
-	MACRO        = "MACRO"
+	ANY          Type = "ANY"
+	NUMBER       Type = "NUMBER"
+	BOOLEAN      Type = "BOOLEAN"
+	NULL         Type = "NULL"
+	RETURN_VALUE Type = "RETURN_VALUE"
+	ERROR        Type = "ERROR"
+	FUNCTION     Type = "FUNCTION"
+	BUILTIN      Type = "BUILTIN"
+	STRING       Type = "STRING"
+	ARRAY        Type = "ARRAY"
+	HASH         Type = "HASH"
+	QUOTE        Type = "QUOTE"
+	MACRO        Type = "MACRO"
 )
 
-type Integer struct {
+func (t Type) String() string {
+	return string(t)
+}
+
+type Number struct {
 	Value int64
 }
 
@@ -108,8 +113,8 @@ type Macro struct {
  *                                OBJECTS                                    *
  *****************************************************************************/
 
-func (i *Integer) Type() Type {
-	return INTEGER
+func (i *Number) Type() Type {
+	return NUMBER
 }
 func (b *Boolean) Type() Type {
 	return BOOLEAN
@@ -145,7 +150,7 @@ func (m *Macro) Type() Type {
 	return MACRO
 }
 
-func (i *Integer) Inspect() string {
+func (i *Number) Inspect() string {
 	return fmt.Sprintf("%d", i.Value)
 }
 func (b *Boolean) Inspect() string {
@@ -235,8 +240,8 @@ func (m *Macro) Inspect() string {
  *                               HASHABLE                                    *
  *****************************************************************************/
 
-func (i *Integer) HashKey() HashKey {
-	return HashKey{Type: INTEGER, Value: uint64(i.Value)}
+func (i *Number) HashKey() HashKey {
+	return HashKey{Type: NUMBER, Value: uint64(i.Value)}
 }
 func (b *Boolean) HashKey() HashKey {
 	var value uint64
