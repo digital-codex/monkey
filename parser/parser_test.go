@@ -371,6 +371,58 @@ func TestInfixExpressions(t *testing.T) {
 	}
 }
 
+func TestGroupedExpressions(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected struct {
+			literal string
+			value   any
+		}
+	}{
+		{
+			input: `(5);`,
+			expected: struct {
+				literal string
+				value   any
+			}{
+				"(",
+				5,
+			},
+		},
+		{
+			input: `(true);`,
+			expected: struct {
+				literal string
+				value   any
+			}{
+				"(",
+				true,
+			},
+		},
+		{
+			input: `("foobar");`,
+			expected: struct {
+				literal string
+				value   any
+			}{
+				"(",
+				"foobar",
+			},
+		},
+	}
+
+	for i, test := range tests {
+		l := lexer.New(test.input)
+		p := New(l)
+		program := p.ParseProgram()
+
+		checkParserErrors(t, p)
+		testProgram(t, i, program)
+
+		testStatement(program.Statements[0])(t, i, program.Statements[0], test.expected.literal, test.expected.value)
+	}
+}
+
 func TestBooleanExpression(t *testing.T) {
 	tests := []struct {
 		input    string
@@ -954,6 +1006,8 @@ func testExpression(exp ast.Expression) func(*testing.T, int, ast.Expression, ..
 		return testPrefixExpression
 	case *ast.InfixExpression:
 		return testInfixExpression
+	case *ast.GroupedExpression:
+		return testGroupedExpression
 	case *ast.Boolean:
 		return testBoolean
 	case *ast.IfExpression:
@@ -979,7 +1033,7 @@ func testExpression(exp ast.Expression) func(*testing.T, int, ast.Expression, ..
 
 func testLetStatement(t *testing.T, i int, stmt ast.Statement, expected ...any) {
 	assertions.AssertTypeOf(t, reflect.TypeOf(ast.LetStatement{}), stmt, "test["+strconv.Itoa(i)+"] - ast.Statement unexpected type")
-	assertions.AssertStringEquals(t, "let", stmt.TokenLiteral(), "test["+strconv.Itoa(i)+"] - ast.Statement.TokenLiteral() wrong")
+	assertions.AssertStringEquals(t, "let", stmt.TokenLexeme(), "test["+strconv.Itoa(i)+"] - ast.Statement.TokenLexeme() wrong")
 	if 1 >= len(expected) {
 		t.Fatalf("testLetStatement: len(expect) wrong: expect=>1, actual=%d", len(expected))
 	}
@@ -989,7 +1043,7 @@ func testLetStatement(t *testing.T, i int, stmt ast.Statement, expected ...any) 
 
 func testReturnStatement(t *testing.T, i int, stmt ast.Statement, expected ...any) {
 	assertions.AssertTypeOf(t, reflect.TypeOf(ast.ReturnStatement{}), stmt, "test["+strconv.Itoa(i)+"] - ast.Statement unexpected type")
-	assertions.AssertStringEquals(t, "return", stmt.TokenLiteral(), "test["+strconv.Itoa(i)+"] - ast.Statement.TokenLiteral() wrong")
+	assertions.AssertStringEquals(t, "return", stmt.TokenLexeme(), "test["+strconv.Itoa(i)+"] - ast.Statement.TokenLexeme() wrong")
 	if 0 == len(expected) {
 		t.Fatalf("testReturnStatement: len(expect) wrong: expect=>0, actual=%d", len(expected))
 	}
@@ -1001,17 +1055,17 @@ func testExpressionStatement(t *testing.T, i int, stmt ast.Statement, expected .
 	if 1 >= len(expected) {
 		t.Fatalf("testExpressionStatement: len(expect) wrong: expect=>1, actual=%d", len(expected))
 	}
-	literal, ok := expected[0].(string)
+	lexeme, ok := expected[0].(string)
 	if !ok {
 		t.Fatalf("testExpressionStatement: expect[0] unexpected type: expect=string, actual=%T", expected[0])
 	}
-	assertions.AssertStringEquals(t, literal, stmt.TokenLiteral(), "test["+strconv.Itoa(i)+"] - stmt.TokenLiteral() wrong")
+	assertions.AssertStringEquals(t, lexeme, stmt.TokenLexeme(), "test["+strconv.Itoa(i)+"] - stmt.TokenLexeme() wrong")
 	testExpression(stmt.(*ast.ExpressionStatement).Expression)(t, i, stmt.(*ast.ExpressionStatement).Expression, expected[1:]...)
 }
 
 func testBlockStatement(t *testing.T, i int, stmt ast.Statement, expected ...any) {
 	assertions.AssertNotNull(t, stmt, "test["+strconv.Itoa(i)+"] - stmt is nil")
-	assertions.AssertStringEquals(t, "{", stmt.TokenLiteral(), "test["+strconv.Itoa(i)+"] - stmt.TokenLiteral() wrong")
+	assertions.AssertStringEquals(t, "{", stmt.TokenLexeme(), "test["+strconv.Itoa(i)+"] - stmt.TokenLexeme() wrong")
 	if 0 == len(expected) {
 		t.Fatalf("testBlockStatement: len(expect) wrong: expect=>0, actual=%d", len(expected))
 	}
@@ -1028,7 +1082,7 @@ func testIdentifier(t *testing.T, i int, exp ast.Expression, expected ...any) {
 	if !ok {
 		t.Fatalf("testIdentifier: expect[0] unexpected type: expect=string, actual=%T", expected[0])
 	}
-	assertions.AssertStringEquals(t, value, exp.(*ast.Identifier).TokenLiteral(), "test["+strconv.Itoa(i)+"] exp.(*ast.Identifier).TokenLiteral() wrong")
+	assertions.AssertStringEquals(t, value, exp.(*ast.Identifier).TokenLexeme(), "test["+strconv.Itoa(i)+"] exp.(*ast.Identifier).TokenLexeme() wrong")
 	assertions.AssertStringEquals(t, value, exp.(*ast.Identifier).Value, "test["+strconv.Itoa(i)+"] exp.(*ast.Identifier).Value wrong")
 }
 
@@ -1041,7 +1095,7 @@ func testIntegerLiteral(t *testing.T, i int, exp ast.Expression, expected ...any
 	if !ok {
 		t.Fatalf("testIntegerLiteral: expect[0] unexpected type: expect=int64, actual=%T", expected[0])
 	}
-	assertions.AssertStringEquals(t, fmt.Sprintf("%d", value), exp.(*ast.IntegerLiteral).TokenLiteral(), "test["+strconv.Itoa(i)+"] exp.(*ast.IntegerLiteral).TokenLiteral() wrong")
+	assertions.AssertStringEquals(t, fmt.Sprintf("%d", value), exp.(*ast.IntegerLiteral).TokenLexeme(), "test["+strconv.Itoa(i)+"] exp.(*ast.IntegerLiteral).TokenLexeme() wrong")
 	assertions.AssertInt64Equals(t, int64(value), exp.(*ast.IntegerLiteral).Value, "test["+strconv.Itoa(i)+"] exp.(*ast.IntegerLiteral).Value wrong")
 }
 
@@ -1054,7 +1108,7 @@ func testPrefixExpression(t *testing.T, i int, exp ast.Expression, expected ...a
 	if !ok {
 		t.Fatalf("testPrefixExpression: expect[0] unexpected type: expect=string, actual=%T", expected[0])
 	}
-	assertions.AssertStringEquals(t, operator, exp.(*ast.PrefixExpression).TokenLiteral(), "test["+strconv.Itoa(i)+"] exp.(*ast.PrefixExpression).TokenLiteral() wrong")
+	assertions.AssertStringEquals(t, operator, exp.(*ast.PrefixExpression).TokenLexeme(), "test["+strconv.Itoa(i)+"] exp.(*ast.PrefixExpression).TokenLexeme() wrong")
 	assertions.AssertStringEquals(t, operator, exp.(*ast.PrefixExpression).Operator, "test["+strconv.Itoa(i)+"] exp.(*ast.PrefixExpression).Operator wrong")
 	testExpression(exp.(*ast.PrefixExpression).Right)(t, i, exp.(*ast.PrefixExpression).Right, expected[1])
 }
@@ -1068,10 +1122,19 @@ func testInfixExpression(t *testing.T, i int, exp ast.Expression, expected ...an
 	if !ok {
 		t.Fatalf("testInfixExpression: expect[1] unexpected type: expect=string, actual=%T", expected[1])
 	}
-	assertions.AssertStringEquals(t, operator, exp.(*ast.InfixExpression).TokenLiteral(), "test["+strconv.Itoa(i)+"] exp.(*ast.InfixExpression).TokenLiteral() wrong")
+	assertions.AssertStringEquals(t, operator, exp.(*ast.InfixExpression).TokenLexeme(), "test["+strconv.Itoa(i)+"] exp.(*ast.InfixExpression).TokenLexeme() wrong")
 	assertions.AssertStringEquals(t, operator, exp.(*ast.InfixExpression).Operator, "test["+strconv.Itoa(i)+"] exp.(*ast.InfixExpression).Operator wrong")
 	testExpression(exp.(*ast.InfixExpression).Left)(t, i, exp.(*ast.InfixExpression).Left, expected[0])
 	testExpression(exp.(*ast.InfixExpression).Right)(t, i, exp.(*ast.InfixExpression).Right, expected[2])
+}
+
+func testGroupedExpression(t *testing.T, i int, exp ast.Expression, expected ...any) {
+	assertions.AssertTypeOf(t, reflect.TypeOf(ast.GroupedExpression{}), exp, "test["+strconv.Itoa(i)+"] - ast.Expression unexpected type")
+	assertions.AssertStringEquals(t, "(", exp.TokenLexeme(), "test["+strconv.Itoa(i)+"] - exp.TokenLexeme() wrong")
+	if 1 != len(expected) {
+		t.Fatalf("testGroupedExpression: len(expect) wrong: expect=1, actual=%d", len(expected))
+	}
+	testExpression(exp.(*ast.GroupedExpression).Expression)(t, i, exp.(*ast.GroupedExpression).Expression, expected[0])
 }
 
 func testBoolean(t *testing.T, i int, exp ast.Expression, expected ...any) {
@@ -1083,13 +1146,13 @@ func testBoolean(t *testing.T, i int, exp ast.Expression, expected ...any) {
 	if !ok {
 		t.Fatalf("testBoolean: expect[0] unexpected type: expect=bool, actual=%T", expected[0])
 	}
-	assertions.AssertStringEquals(t, fmt.Sprintf("%t", value), exp.(*ast.Boolean).TokenLiteral(), "test["+strconv.Itoa(i)+"] exp.(*ast.Boolean).TokenLiteral() wrong")
+	assertions.AssertStringEquals(t, fmt.Sprintf("%t", value), exp.(*ast.Boolean).TokenLexeme(), "test["+strconv.Itoa(i)+"] exp.(*ast.Boolean).TokenLexeme() wrong")
 	assertions.AssertBoolEquals(t, value, exp.(*ast.Boolean).Value, "test["+strconv.Itoa(i)+"] exp.(*ast.Boolean).Value wrong")
 }
 
 func testIfExpression(t *testing.T, i int, exp ast.Expression, expected ...any) {
 	assertions.AssertTypeOf(t, reflect.TypeOf(ast.IfExpression{}), exp, "test["+strconv.Itoa(i)+"] - ast.Expression unexpected type")
-	assertions.AssertStringEquals(t, "if", exp.(*ast.IfExpression).TokenLiteral(), "test["+strconv.Itoa(i)+"] exp.(*ast.IfExpression).TokenLiteral() wrong")
+	assertions.AssertStringEquals(t, "if", exp.(*ast.IfExpression).TokenLexeme(), "test["+strconv.Itoa(i)+"] exp.(*ast.IfExpression).TokenLexeme() wrong")
 	if 5 != len(expected) {
 		t.Fatalf("testIfExpression: len(expect) wrong: expect=5, actual=%d", len(expected))
 	}
@@ -1116,7 +1179,7 @@ func testIfExpression(t *testing.T, i int, exp ast.Expression, expected ...any) 
 
 func testFunctionLiteral(t *testing.T, i int, exp ast.Expression, expected ...any) {
 	assertions.AssertTypeOf(t, reflect.TypeOf(ast.FunctionLiteral{}), exp, "test["+strconv.Itoa(i)+"] - ast.Expression unexpected type")
-	assertions.AssertStringEquals(t, "fn", exp.(*ast.FunctionLiteral).TokenLiteral(), "test["+strconv.Itoa(i)+"] exp.(*ast.FunctionLiteral).TokenLiteral() wrong")
+	assertions.AssertStringEquals(t, "fn", exp.(*ast.FunctionLiteral).TokenLexeme(), "test["+strconv.Itoa(i)+"] exp.(*ast.FunctionLiteral).TokenLexeme() wrong")
 	if 2 != len(expected) {
 		t.Fatalf("testFunctionLiteral: len(expect) wrong: expect=2, actual=%d", len(expected))
 	}
@@ -1141,7 +1204,7 @@ func testFunctionLiteral(t *testing.T, i int, exp ast.Expression, expected ...an
 
 func testCallExpression(t *testing.T, i int, exp ast.Expression, expected ...any) {
 	assertions.AssertTypeOf(t, reflect.TypeOf(ast.CallExpression{}), exp, "test["+strconv.Itoa(i)+"] - ast.Expression unexpected type")
-	assertions.AssertStringEquals(t, "(", exp.(*ast.CallExpression).TokenLiteral(), "test["+strconv.Itoa(i)+"] exp.(*ast.CallExpression).TokenLiteral() wrong")
+	assertions.AssertStringEquals(t, "(", exp.(*ast.CallExpression).TokenLexeme(), "test["+strconv.Itoa(i)+"] exp.(*ast.CallExpression).TokenLexeme() wrong")
 	if 2 != len(expected) {
 		t.Fatalf("testCallExpression: len(expect) wrong: expect=2, actual=%d", len(expected))
 	}
@@ -1175,7 +1238,7 @@ func testStringLiteral(t *testing.T, i int, exp ast.Expression, expected ...any)
 	if !ok {
 		t.Fatalf("testStringLiteral: expect[0] unexpected type: expect=string, actual=%T", expected[0])
 	}
-	assertions.AssertStringEquals(t, value, exp.(*ast.StringLiteral).TokenLiteral(), "test["+strconv.Itoa(i)+"] exp.(*ast.StringLiteral).TokenLiteral() wrong")
+	assertions.AssertStringEquals(t, value, exp.(*ast.StringLiteral).TokenLexeme(), "test["+strconv.Itoa(i)+"] exp.(*ast.StringLiteral).TokenLexeme() wrong")
 	assertions.AssertStringEquals(t, value, exp.(*ast.StringLiteral).Value, "test["+strconv.Itoa(i)+"] exp.(*ast.StringLiteral).Value wrong")
 }
 
@@ -1252,7 +1315,7 @@ func testHashLiteral(t *testing.T, i int, exp ast.Expression, expected ...any) {
 
 func testMacroLiteral(t *testing.T, i int, exp ast.Expression, expected ...any) {
 	assertions.AssertTypeOf(t, reflect.TypeOf(ast.MacroLiteral{}), exp, "test["+strconv.Itoa(i)+"] - ast.Expression unexpected type")
-	assertions.AssertStringEquals(t, "macro", exp.(*ast.MacroLiteral).TokenLiteral(), "test["+strconv.Itoa(i)+"] exp.(*ast.MacroLiteral).TokenLiteral() wrong")
+	assertions.AssertStringEquals(t, "macro", exp.(*ast.MacroLiteral).TokenLexeme(), "test["+strconv.Itoa(i)+"] exp.(*ast.MacroLiteral).TokenLexeme() wrong")
 	if 2 != len(expected) {
 		t.Fatalf("testMacroLiteral: len(expect) wrong: expect=2, actual=%d", len(expected))
 	}

@@ -17,30 +17,28 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 	// Statements
 	case *ast.Program:
 		return evalProgram(node, env)
-	case *ast.ExpressionStatement:
-		return Eval(node.Expression, env)
-	case *ast.Block:
-		return evalBlockStatements(node, env)
-	case *ast.ReturnStatement:
-		val := Eval(node.ReturnValue, env)
-		if isError(val) {
-			return val
-		}
-		return &object.ReturnValue{Value: val}
 	case *ast.LetStatement:
 		val := Eval(node.Value, env)
 		if isError(val) {
 			return val
 		}
 		env.Set(node.Name.Value, val)
+	case *ast.ReturnStatement:
+		val := Eval(node.ReturnValue, env)
+		if isError(val) {
+			return val
+		}
+		return &object.ReturnValue{Value: val}
+	case *ast.ExpressionStatement:
+		return Eval(node.Expression, env)
+	case *ast.Block:
+		return evalBlockStatements(node, env)
 
 	// Expressions
+	case *ast.Identifier:
+		return evalIdentifier(node, env)
 	case *ast.IntegerLiteral:
 		return &object.Integer{Value: node.Value}
-	case *ast.StringLiteral:
-		return &object.String{Value: node.Value}
-	case *ast.Boolean:
-		return nativeBoolToBooleanObject(node.Value)
 	case *ast.PrefixExpression:
 		right := Eval(node.Right, env)
 		if isError(right) {
@@ -60,16 +58,18 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 		}
 
 		return evalInfixExpression(node.Operator, left, right)
+	case *ast.GroupedExpression:
+		return Eval(node.Expression, env)
+	case *ast.Boolean:
+		return nativeBoolToBooleanObject(node.Value)
 	case *ast.IfExpression:
 		return evalIfExpression(node, env)
-	case *ast.Identifier:
-		return evalIdentifier(node, env)
 	case *ast.FunctionLiteral:
 		params := node.Parameters
 		body := node.Body
 		return &object.Function{Parameters: params, Env: env, Body: body}
 	case *ast.CallExpression:
-		if node.Function.TokenLiteral() == "quote" {
+		if node.Function.TokenLexeme() == "quote" {
 			return quote(node.Argument[0], env)
 		}
 		function := Eval(node.Function, env)
@@ -82,6 +82,8 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 		}
 
 		return applyFunction(function, args)
+	case *ast.StringLiteral:
+		return &object.String{Value: node.Value}
 	case *ast.ArrayLiteral:
 		elements := evalExpressions(node.Elements, env)
 		if len(elements) == 1 && isError(elements[0]) {

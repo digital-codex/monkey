@@ -11,7 +11,7 @@ import (
  *****************************************************************************/
 
 type Node interface {
-	TokenLiteral() string
+	TokenLexeme() string
 	String() string
 }
 
@@ -137,9 +137,9 @@ type MacroLiteral struct {
  *                                   NODES                                   *
  *****************************************************************************/
 
-func (p *Program) TokenLiteral() string {
+func (p *Program) TokenLexeme() string {
 	if len(p.Statements) > 0 {
-		return p.Statements[0].TokenLiteral()
+		return p.Statements[0].TokenLexeme()
 	} else {
 		return ""
 	}
@@ -163,23 +163,23 @@ func (rs *ReturnStatement) statementNode()     {}
 func (es *ExpressionStatement) statementNode() {}
 func (bs *Block) statementNode()               {}
 
-func (ls *LetStatement) TokenLiteral() string {
+func (ls *LetStatement) TokenLexeme() string {
 	return ls.Token.Lexeme
 }
-func (rs *ReturnStatement) TokenLiteral() string {
+func (rs *ReturnStatement) TokenLexeme() string {
 	return rs.Token.Lexeme
 }
-func (es *ExpressionStatement) TokenLiteral() string {
+func (es *ExpressionStatement) TokenLexeme() string {
 	return es.Token.Lexeme
 }
-func (bs *Block) TokenLiteral() string {
+func (bs *Block) TokenLexeme() string {
 	return bs.Token.Lexeme
 }
 
 func (ls *LetStatement) String() string {
 	var out bytes.Buffer
 
-	out.WriteString(ls.TokenLiteral() + " ")
+	out.WriteString(ls.TokenLexeme() + " ")
 	out.WriteString(ls.Name.String())
 	out.WriteString(" = ")
 
@@ -194,7 +194,7 @@ func (ls *LetStatement) String() string {
 func (rs *ReturnStatement) String() string {
 	var out bytes.Buffer
 
-	out.WriteString(rs.TokenLiteral())
+	out.WriteString(rs.TokenLexeme())
 
 	if rs.ReturnValue != nil {
 		out.WriteString(" " + rs.ReturnValue.String())
@@ -225,57 +225,61 @@ func (bs *Block) String() string {
  *                               EXPRESSIONS                                 *
  *****************************************************************************/
 
-func (i *Identifier) expressionNode()        {}
-func (il *IntegerLiteral) expressionNode()   {}
-func (pe *PrefixExpression) expressionNode() {}
-func (ie *InfixExpression) expressionNode()  {}
-func (b *Boolean) expressionNode()           {}
-func (ie *IfExpression) expressionNode()     {}
-func (fl *FunctionLiteral) expressionNode()  {}
-func (ce *CallExpression) expressionNode()   {}
-func (sl *StringLiteral) expressionNode()    {}
-func (al *ArrayLiteral) expressionNode()     {}
-func (ie *IndexExpression) expressionNode()  {}
-func (hl *HashLiteral) expressionNode()      {}
-func (ml *MacroLiteral) expressionNode()     {}
+func (i *Identifier) expressionNode()         {}
+func (il *IntegerLiteral) expressionNode()    {}
+func (pe *PrefixExpression) expressionNode()  {}
+func (ie *InfixExpression) expressionNode()   {}
+func (ge *GroupedExpression) expressionNode() {}
+func (b *Boolean) expressionNode()            {}
+func (ie *IfExpression) expressionNode()      {}
+func (fl *FunctionLiteral) expressionNode()   {}
+func (ce *CallExpression) expressionNode()    {}
+func (sl *StringLiteral) expressionNode()     {}
+func (al *ArrayLiteral) expressionNode()      {}
+func (ie *IndexExpression) expressionNode()   {}
+func (hl *HashLiteral) expressionNode()       {}
+func (ml *MacroLiteral) expressionNode()      {}
 
-func (i *Identifier) TokenLiteral() string {
+func (i *Identifier) TokenLexeme() string {
 	return i.Token.Lexeme
 }
-func (il *IntegerLiteral) TokenLiteral() string {
+func (il *IntegerLiteral) TokenLexeme() string {
 	return il.Token.Lexeme
 }
-func (pe *PrefixExpression) TokenLiteral() string {
+func (pe *PrefixExpression) TokenLexeme() string {
 	return pe.Token.Lexeme
 }
-func (ie *InfixExpression) TokenLiteral() string {
+func (ie *InfixExpression) TokenLexeme() string {
 	return ie.Token.Lexeme
 }
-func (b *Boolean) TokenLiteral() string {
+func (ge *GroupedExpression) TokenLexeme() string {
+	return ge.Token.Lexeme
+}
+func (b *Boolean) TokenLexeme() string {
 	return b.Token.Lexeme
 }
-func (ie *IfExpression) TokenLiteral() string {
+func (ie *IfExpression) TokenLexeme() string {
 	return ie.Token.Lexeme
 }
-func (fl *FunctionLiteral) TokenLiteral() string {
+func (fl *FunctionLiteral) TokenLexeme() string {
 	return fl.Token.Lexeme
 }
-func (ce *CallExpression) TokenLiteral() string {
+func (ce *CallExpression) TokenLexeme() string {
 	return ce.Token.Lexeme
 }
-func (sl *StringLiteral) TokenLiteral() string {
+func (sl *StringLiteral) TokenLexeme() string {
 	return sl.Token.Lexeme
 }
-func (al *ArrayLiteral) TokenLiteral() string {
+func (al *ArrayLiteral) TokenLexeme() string {
 	return al.Token.Lexeme
 }
-func (ie *IndexExpression) TokenLiteral() string {
+func (ie *IndexExpression) TokenLexeme() string {
 	return ie.Token.Lexeme
 }
-func (hl *HashLiteral) TokenLiteral() string {
+func (hl *HashLiteral) TokenLexeme() string {
 	return hl.Token.Lexeme
 }
-func (ml *MacroLiteral) TokenLiteral() string {
+func (ml *MacroLiteral) TokenLexeme() string {
 	return ml.Token.Lexeme
 }
 
@@ -306,6 +310,9 @@ func (ie *InfixExpression) String() string {
 
 	return out.String()
 }
+func (ge *GroupedExpression) String() string {
+	return ge.Expression.String()
+}
 func (b *Boolean) String() string {
 	return b.Token.Lexeme
 }
@@ -332,7 +339,7 @@ func (fl *FunctionLiteral) String() string {
 		params = append(params, p.String())
 	}
 
-	out.WriteString(fl.TokenLiteral())
+	out.WriteString(fl.TokenLexeme())
 	out.WriteString("(")
 	out.WriteString(strings.Join(params, ", "))
 	out.WriteString(")")
@@ -404,7 +411,7 @@ func (ml *MacroLiteral) String() string {
 		params = append(params, param.String())
 	}
 
-	out.WriteString(ml.TokenLiteral())
+	out.WriteString(ml.TokenLexeme())
 	out.WriteString("(")
 	out.WriteString(strings.Join(params, ", "))
 	out.WriteString(")")

@@ -58,5 +58,5 @@ func isUnquotedCall(node ast.Node) bool {
 		return false
 	}
 
-	return callExpression.Function.TokenLiteral() == "unquote"
+	return callExpression.Function.TokenLexeme() == "unquote"
 }
