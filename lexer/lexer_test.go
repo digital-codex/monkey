@@ -10,6 +10,10 @@ import (
 
 var logger = log.Default()
 
+func LogError(e error) {
+	logger.Print(e.Error())
+}
+
 func TestNext(t *testing.T) {
 	tests := []struct {
 		input    string
@@ -245,8 +249,7 @@ func TestNext(t *testing.T) {
 	}
 
 	for i, test := range tests {
-		l := New(test.input)
-		l.ErrorHandler = handler
+		l := New(test.input, LogError)
 		for _, expected := range test.expected {
 			actual := l.Next()
 			assertions.AssertEquals(t, expected.Type, actual.Type, "test["+strconv.Itoa(i)+"] - Type wrong")
@@ -284,16 +287,11 @@ func TestErrors(t *testing.T) {
 	}
 
 	for i, test := range tests {
-		l := New(test.input)
-		l.ErrorHandler = handler
+		l := New(test.input, LogError)
 		for _, expected := range test.expected {
 			actual := l.Next()
 			assertions.AssertEquals(t, expected.Type, actual.Type, "test["+strconv.Itoa(i)+"] - Type wrong")
 			assertions.AssertStringEquals(t, expected.Lexeme, actual.Lexeme, "test["+strconv.Itoa(i)+"] - Lexeme wrong")
 		}
 	}
-}
-
-func handler(e error) {
-	logger.Print(e.Error())
 }

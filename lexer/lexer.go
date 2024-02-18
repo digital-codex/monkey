@@ -29,7 +29,7 @@ type Lexer struct {
 	line int
 
 	ErrorHandler ErrorHandler
-	errors       bool
+	errors       int
 }
 
 var keywords = map[string]token.Type{
@@ -47,12 +47,12 @@ var keywords = map[string]token.Type{
  *                              PUBLIC FUNCTIONS                             *
  *****************************************************************************/
 
-func New(input string) *Lexer {
-	return &Lexer{input, 0, 0, 1, nil, false}
+func New(input string, eh ErrorHandler) *Lexer {
+	return &Lexer{input, 0, 0, 1, eh, 0}
 }
 
 func (l *Lexer) Next() token.Token {
-	for l.current < len(l.source) && !l.errors {
+	for l.current < len(l.source) {
 		l.start = l.current
 
 		ch := l.peek(0)
@@ -237,7 +237,7 @@ func (l *Lexer) error(e Error) string {
 	if l.ErrorHandler != nil {
 		l.ErrorHandler(errors.New(out.String()))
 	}
-	l.errors = true
+	l.errors++
 
 	return string(e)
 }

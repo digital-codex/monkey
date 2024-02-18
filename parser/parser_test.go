@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/digital-codex/assertions"
 	"github.com/digital-codex/monkey/ast"
-	"github.com/digital-codex/monkey/lexer"
 	"reflect"
 	"strconv"
 	"testing"
@@ -51,8 +50,7 @@ func TestLetDeclaration(t *testing.T) {
 	}
 
 	for i, test := range tests {
-		l := lexer.New(test.input)
-		p := New(l)
+		p := New(test.input)
 		program := p.ParseProgram()
 
 		checkParserErrors(t, p)
@@ -73,8 +71,7 @@ func TestReturnStatement(t *testing.T) {
 	}
 
 	for i, test := range tests {
-		l := lexer.New(test.input)
-		p := New(l)
+		p := New(test.input)
 		program := p.ParseProgram()
 
 		checkParserErrors(t, p)
@@ -105,8 +102,7 @@ func TestIdentifier(t *testing.T) {
 	}
 
 	for i, test := range tests {
-		l := lexer.New(test.input)
-		p := New(l)
+		p := New(test.input)
 		program := p.ParseProgram()
 
 		checkParserErrors(t, p)
@@ -137,8 +133,7 @@ func TestNumberLiteral(t *testing.T) {
 	}
 
 	for i, test := range tests {
-		l := lexer.New(test.input)
-		p := New(l)
+		p := New(test.input)
 		program := p.ParseProgram()
 
 		checkParserErrors(t, p)
@@ -204,8 +199,7 @@ func TestPrefixExpression(t *testing.T) {
 	}
 
 	for i, test := range tests {
-		l := lexer.New(test.input)
-		p := New(l)
+		p := New(test.input)
 		program := p.ParseProgram()
 
 		checkParserErrors(t, p)
@@ -360,8 +354,7 @@ func TestInfixExpression(t *testing.T) {
 	}
 
 	for i, test := range tests {
-		l := lexer.New(test.input)
-		p := New(l)
+		p := New(test.input)
 		program := p.ParseProgram()
 
 		checkParserErrors(t, p)
@@ -412,8 +405,7 @@ func TestGroupedExpression(t *testing.T) {
 	}
 
 	for i, test := range tests {
-		l := lexer.New(test.input)
-		p := New(l)
+		p := New(test.input)
 		program := p.ParseProgram()
 
 		checkParserErrors(t, p)
@@ -454,8 +446,7 @@ func TestBoolean(t *testing.T) {
 	}
 
 	for i, test := range tests {
-		l := lexer.New(test.input)
-		p := New(l)
+		p := New(test.input)
 		program := p.ParseProgram()
 
 		checkParserErrors(t, p)
@@ -548,8 +539,7 @@ func TestIfExpression(t *testing.T) {
 	}
 
 	for i, test := range tests {
-		l := lexer.New(test.input)
-		p := New(l)
+		p := New(test.input)
 		program := p.ParseProgram()
 
 		checkParserErrors(t, p)
@@ -601,8 +591,7 @@ func TestFunctionLiteral(t *testing.T) {
 	}
 
 	for i, test := range tests {
-		l := lexer.New(test.input)
-		p := New(l)
+		p := New(test.input)
 		program := p.ParseProgram()
 
 		checkParserErrors(t, p)
@@ -652,8 +641,7 @@ func TestCallExpression(t *testing.T) {
 	}
 
 	for i, test := range tests {
-		l := lexer.New(test.input)
-		p := New(l)
+		p := New(test.input)
 		program := p.ParseProgram()
 
 		checkParserErrors(t, p)
@@ -684,8 +672,7 @@ func TestStringLiteral(t *testing.T) {
 	}
 
 	for i, test := range tests {
-		l := lexer.New(test.input)
-		p := New(l)
+		p := New(test.input)
 		program := p.ParseProgram()
 
 		checkParserErrors(t, p)
@@ -732,8 +719,7 @@ func TestArrayLiteral(t *testing.T) {
 	}
 
 	for i, test := range tests {
-		l := lexer.New(test.input)
-		p := New(l)
+		p := New(test.input)
 		program := p.ParseProgram()
 
 		checkParserErrors(t, p)
@@ -781,8 +767,7 @@ func TestIndexExpression(t *testing.T) {
 	}
 
 	for i, test := range tests {
-		l := lexer.New(test.input)
-		p := New(l)
+		p := New(test.input)
 		program := p.ParseProgram()
 
 		checkParserErrors(t, p)
@@ -869,8 +854,7 @@ func TestHashLiteral(t *testing.T) {
 	}
 
 	for i, test := range tests {
-		l := lexer.New(test.input)
-		p := New(l)
+		p := New(test.input)
 		program := p.ParseProgram()
 
 		checkParserErrors(t, p)
@@ -922,8 +906,7 @@ func TestMacroLiteral(t *testing.T) {
 	}
 
 	for i, test := range tests {
-		l := lexer.New(test.input)
-		p := New(l)
+		p := New(test.input)
 		program := p.ParseProgram()
 
 		checkParserErrors(t, p)
@@ -967,8 +950,7 @@ func TestOperatorPrecedenceParsing(t *testing.T) {
 	}
 
 	for i, test := range tests {
-		l := lexer.New(test.input)
-		p := New(l)
+		p := New(test.input)
 		program := p.ParseProgram()
 		checkParserErrors(t, p)
 

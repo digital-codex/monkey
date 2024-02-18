@@ -15,7 +15,6 @@ import (
  *****************************************************************************/
 
 type Error string
-type ErrorHandler func(error)
 
 const (
 	EXPECTED_EXPRESSION     Error = "expect expression"
@@ -42,8 +41,7 @@ type Parser struct {
 
 	rules map[token.Type]Rule
 
-	ErrorHandler ErrorHandler
-	errors       []error
+	errors []error
 }
 
 type Precedence int
@@ -64,8 +62,17 @@ const (
  *                              PUBLIC FUNCTIONS                             *
  *****************************************************************************/
 
-func New(l *lexer.Lexer) *Parser {
-	p := &Parser{l, l.Next(), l.Next(), make(map[token.Type]Rule), nil, []error{}}
+func New(input string) *Parser {
+	p := &Parser{}
+	p.errors = []error{}
+
+	eh := func(err error) { p.errors = append(p.errors, err) }
+	l := lexer.New(input, eh)
+	p.l = l
+	p.current = l.Next()
+	p.peek = l.Next()
+
+	p.rules = make(map[token.Type]Rule)
 	p.registerRule(token.EOF, nil, nil, NONE)
 
 	p.registerRule(token.EQUAL, nil, nil, NONE)
@@ -507,9 +514,5 @@ func (p *Parser) error(e Error) {
 		out.WriteString(fmt.Sprintf("Error:%d:%d: %s wanted %q\n", p.peek.Line, p.peek.Start, e, p.peek.Lexeme))
 	}
 
-	err := errors.New(out.String())
-	if p.ErrorHandler != nil {
-		p.ErrorHandler(err)
-	}
-	p.errors = append(p.errors, err)
+	p.errors = append(p.errors, errors.New(out.String()))
 }

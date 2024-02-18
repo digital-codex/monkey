@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/digital-codex/assertions"
 	"github.com/digital-codex/monkey/ast"
-	"github.com/digital-codex/monkey/lexer"
 	"github.com/digital-codex/monkey/object"
 	"github.com/digital-codex/monkey/parser"
 	"reflect"
@@ -106,7 +105,6 @@ func TestExpandMacros(t *testing.T) {
 }
 
 func parse(input string) *ast.Program {
-	l := lexer.New(input)
-	p := parser.New(l)
+	p := parser.New(input)
 	return p.ParseProgram()
 }

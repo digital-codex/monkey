@@ -2,7 +2,6 @@ package evaluator
 
 import (
 	"github.com/digital-codex/assertions"
-	"github.com/digital-codex/monkey/lexer"
 	"github.com/digital-codex/monkey/object"
 	"github.com/digital-codex/monkey/parser"
 	"reflect"
@@ -146,8 +145,7 @@ func TestErrorHandling(t *testing.T) {
 }
 
 func eval(input string) object.Object {
-	l := lexer.New(input)
-	p := parser.New(l)
+	p := parser.New(input)
 	program := p.ParseProgram()
 	env := object.NewEnvironment()
 	return Eval(program, env)
