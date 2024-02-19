@@ -251,7 +251,7 @@ func (p *Parser) parseIdentifier() ast.Expression {
 func (p *Parser) parseNumberLiteral() ast.Expression {
 	expr := &ast.NumberLiteral{Token: p.current}
 
-	value, err := strconv.ParseInt(p.current.Lexeme, 0, 64)
+	value, err := strconv.ParseFloat(p.current.Lexeme, 64)
 	if err != nil {
 		p.error(INVALID_INTEGER_LITERAL)
 		return nil

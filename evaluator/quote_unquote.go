@@ -57,7 +57,7 @@ func isUnquotedCall(node ast.Node) bool {
 func convertObjectToNode(obj object.Object) ast.Node {
 	switch obj := obj.(type) {
 	case *object.Number:
-		return &ast.NumberLiteral{Token: token.Token{Type: token.NUMBER, Lexeme: fmt.Sprintf("%d", obj.Value)}, Value: obj.Value}
+		return &ast.NumberLiteral{Token: token.Token{Type: token.NUMBER, Lexeme: fmt.Sprintf("%f", obj.Value)}, Value: obj.Value}
 	case *object.Boolean:
 		var t token.Token
 		if obj.Value {

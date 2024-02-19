@@ -114,8 +114,8 @@ RBRACE       -> "}" ;
 RBRACKET     -> "]" ;
 
 STRING      -> "\"" <CHARACTER>* "\"" ;
-IDENT       -> <ALPHA>+ ;
-NUMBER      -> <DIGIT>+ ;
+IDENT       -> <ALPHA> ( <ALPHA> | <DIGIT> )* ;
+NUMBER      -> <DIGIT>+ ( <DOT> <DIGIT>+ )?;
 
 FN          -> "fn" ;
 LET         -> "let" ;

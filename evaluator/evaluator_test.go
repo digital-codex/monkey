@@ -168,11 +168,20 @@ func testObject(o object.Object) func(*testing.T, int, object.Object, any) {
 
 func testNumberObject(t *testing.T, i int, o object.Object, expected any) {
 	assertions.AssertTypeOf(t, reflect.TypeOf(object.Number{}), o, "test["+strconv.Itoa(i)+"] - unexpected type")
-	value, ok := expected.(int)
-	if !ok {
-		t.Fatalf("testNumberObject: expect unexpected type: expect=int, actual=%T", expected)
+	var value float64
+	switch v := expected.(type) {
+	case int:
+		value = float64(v)
+	case int64:
+		value = float64(v)
+	case float32:
+		value = float64(v)
+	case float64:
+		value = v
+	default:
+		t.Fatalf("testNumberObject: expect unexpected type: expect=float64, actual=%T", expected)
 	}
-	assertions.AssertInt64Equals(t, int64(value), o.(*object.Number).Value, "test["+strconv.Itoa(i)+"] - o.(*object.Number).Value wrong")
+	assertions.AssertFloat64Equals(t, value, o.(*object.Number).Value, "test["+strconv.Itoa(i)+"] - o.(*object.Number).Value wrong")
 }
 
 func testBooleanObject(t *testing.T, i int, o object.Object, expected any) {

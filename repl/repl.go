@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"fmt"
 	"github.com/digital-codex/monkey/evaluator"
-	"github.com/digital-codex/monkey/lexer"
 	"github.com/digital-codex/monkey/object"
 	"github.com/digital-codex/monkey/parser"
 	"io"
@@ -51,8 +50,7 @@ func Start(in io.Reader, out io.Writer, current *user.User) {
 		}
 
 		line := scanner.Text()
-		l := lexer.New(line)
-		p := parser.New(l)
+		p := parser.New(line)
 		program := p.ParseProgram()
 		if len(p.Errors()) != 0 {
 			printParseErrors(out, p.Errors())
@@ -71,7 +69,7 @@ func Start(in io.Reader, out io.Writer, current *user.User) {
 	}
 }
 
-func printParseErrors(out io.Writer, errors []string) {
+func printParseErrors(out io.Writer, errors []error) {
 	_, err := io.WriteString(out, MONKEY)
 	if err != nil {
 		log.Fatal(err)

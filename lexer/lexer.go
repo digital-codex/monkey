@@ -26,10 +26,11 @@ type Lexer struct {
 	start   int // start position in source of Token under examination
 	current int // current position in source of Token under examination
 
-	line int
+	line    int
+	lineIdx int
 
-	ErrorHandler ErrorHandler
-	errors       int
+	eh       ErrorHandler
+	errorCnt int
 }
 
 var keywords = map[string]token.Type{
@@ -48,7 +49,7 @@ var keywords = map[string]token.Type{
  *****************************************************************************/
 
 func New(input string, eh ErrorHandler) *Lexer {
-	return &Lexer{input, 0, 0, 1, eh, 0}
+	return &Lexer{input, 0, 0, 1, 0, eh, 0}
 }
 
 func (l *Lexer) Next() token.Token {
@@ -76,7 +77,11 @@ func (l *Lexer) Next() token.Token {
 		case '*':
 			return l.emit(token.STAR)
 		case '/':
-			return l.emit(token.SLASH)
+			if l.match('/') {
+				l.skip(isNotNLAndEOF)
+			} else {
+				return l.emit(token.SLASH)
+			}
 		case '<':
 			return l.emit(token.LESS)
 		case '>':
@@ -99,10 +104,10 @@ func (l *Lexer) Next() token.Token {
 			return l.emit(token.LBRACKET)
 		case ']':
 			return l.emit(token.RBRACKET)
+		case '\t', '\n', '\r', ' ':
+			l.skip(isWhiteSpace)
 		case '"':
 			return l.string()
-		case ' ', '\t', '\n', '\r':
-			l.skip(isWhiteSpace)
 		default:
 			if isAlpha(ch) {
 				return l.ident()
@@ -122,7 +127,7 @@ func (l *Lexer) Next() token.Token {
  *****************************************************************************/
 
 func (l *Lexer) ident() token.Token {
-	lit := l.read(isAlpha)
+	lit := l.read(isAlphaNumeric)
 	t := token.IDENT
 	if tt, ok := keywords[lit]; ok {
 		t = tt
@@ -131,23 +136,36 @@ func (l *Lexer) ident() token.Token {
 }
 
 func (l *Lexer) number() token.Token {
-	return l.emitWithLexeme(token.NUMBER, l.read(isDigit))
+	for ch := l.peek(0); isDigit(ch) && ch != 0; ch = l.peek(0) {
+		l.advance()
+	}
+
+	if l.peek(0) == '.' && isDigit(l.peek(1)) {
+		// consume dot
+		l.advance()
+
+		for ch := l.peek(0); isDigit(ch) && ch != 0; ch = l.peek(0) {
+			l.advance()
+		}
+	}
+
+	return l.emitWithLexeme(token.NUMBER, l.source[l.start:l.current])
 }
 
 func (l *Lexer) string() token.Token {
-	// consume front double-quote
-	l.consume()
+	// consume leading double-quote
+	l.advance()
 
 	for ch := l.peek(0); ch != '"' && ch != '\n' && ch != 0; ch = l.peek(0) {
-		l.consume()
+		l.advance()
 	}
 
 	if l.peek(0) != '"' {
 		return l.emitWithLexeme(token.ILLEGAL, l.error(UNTERMINATED_STRING))
 	}
 
-	// consume back double-quote
-	l.consume()
+	// consume trailing double-quote
+	l.advance()
 	return l.emitWithLexeme(token.STRING, l.source[l.start+1:l.current-1])
 }
 
@@ -160,15 +178,16 @@ func (l *Lexer) unexpected() token.Token {
 func (l *Lexer) skip(condition func(byte) bool) {
 	for ch := l.peek(0); condition(ch); ch = l.peek(0) {
 		if ch == '\n' {
+			l.lineIdx = l.current
 			l.line++
 		}
-		l.consume()
+		l.advance()
 	}
 }
 
 func (l *Lexer) read(condition func(byte) bool) string {
 	for condition(l.peek(0)) {
-		l.consume()
+		l.advance()
 	}
 	return l.source[l.start:l.current]
 }
@@ -181,7 +200,7 @@ func (l *Lexer) peek(n int) byte {
 	}
 }
 
-func (l *Lexer) consume() {
+func (l *Lexer) advance() {
 	if l.current < len(l.source) {
 		l.current++
 	}
@@ -189,14 +208,14 @@ func (l *Lexer) consume() {
 
 func (l *Lexer) match(ch byte) bool {
 	if l.peek(1) == ch {
-		l.consume()
+		l.advance()
 		return true
 	}
 	return false
 }
 
 func (l *Lexer) emit(t token.Type) token.Token {
-	l.consume()
+	l.advance()
 	return token.Token{
 		Type:   t,
 		Start:  l.start,
@@ -221,12 +240,9 @@ func (l *Lexer) error(e Error) string {
 
 	out.WriteString(fmt.Sprintf("Error: %s", e))
 	out.WriteString("\n    ")
-	start := l.start
-	for l.source[start] != '\n' && 0 < start {
-		start--
-	}
-	if l.source[start] == '\n' {
-		start++
+	start := 0
+	if l.lineIdx != 0 {
+		start = l.lineIdx + 1
 	}
 	line := fmt.Sprintf("%d | %s\n", l.line, l.source[start:l.current])
 	out.WriteString(line)
@@ -234,10 +250,10 @@ func (l *Lexer) error(e Error) string {
 	out.WriteString(strings.Repeat(" ", off+2))
 	out.WriteString("^--- Here")
 
-	if l.ErrorHandler != nil {
-		l.ErrorHandler(errors.New(out.String()))
+	if l.eh != nil {
+		l.eh(errors.New(out.String()))
 	}
-	l.errors++
+	l.errorCnt++
 
 	return string(e)
 }
@@ -245,6 +261,10 @@ func (l *Lexer) error(e Error) string {
 /*****************************************************************************
  *                                 UTILITIES                                 *
  *****************************************************************************/
+
+func isNotNLAndEOF(ch byte) bool {
+	return ch != '\n' && ch != 0
+}
 
 func isWhiteSpace(ch byte) bool {
 	return ch == ' ' || ch == '\t' || ch == '\n' || ch == '\r'
@@ -256,4 +276,8 @@ func isAlpha(ch byte) bool {
 
 func isDigit(ch byte) bool {
 	return '0' <= ch && ch <= '9'
+}
+
+func isAlphaNumeric(ch byte) bool {
+	return isAlpha(ch) || isDigit(ch)
 }

@@ -70,7 +70,7 @@ func (t Type) String() string {
 }
 
 type Number struct {
-	Value int64
+	Value float64
 }
 
 type Boolean struct {
@@ -172,7 +172,7 @@ func (m *Macro) Type() Type {
 }
 
 func (i *Number) Inspect() string {
-	return fmt.Sprintf("%d", i.Value)
+	return fmt.Sprintf("%f", i.Value)
 }
 func (b *Boolean) Inspect() string {
 	return fmt.Sprintf("%t", b.Value)

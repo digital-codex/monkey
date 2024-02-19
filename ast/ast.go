@@ -66,7 +66,7 @@ type Identifier struct {
 
 type NumberLiteral struct {
 	Token token.Token // The token.NUMBER token
-	Value int64
+	Value float64
 }
 
 type PrefixExpression struct {

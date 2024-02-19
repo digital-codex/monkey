@@ -117,17 +117,17 @@ func TestNumberLiteral(t *testing.T) {
 		input    string
 		expected struct {
 			literal string
-			value   int
+			value   float64
 		}
 	}{
 		{
-			input: `5;`,
+			input: `5.05;`,
 			expected: struct {
 				literal string
-				value   int
+				value   float64
 			}{
-				"5",
-				5,
+				"5.05",
+				5.05,
 			},
 		},
 	}
@@ -983,7 +983,7 @@ func testExpression(exp ast.Expression) func(*testing.T, int, ast.Expression, ..
 	case *ast.Identifier:
 		return testIdentifier
 	case *ast.NumberLiteral:
-		return testIntegerLiteral
+		return testNumberLiteral
 	case *ast.PrefixExpression:
 		return testPrefixExpression
 	case *ast.InfixExpression:
@@ -1068,17 +1068,30 @@ func testIdentifier(t *testing.T, i int, exp ast.Expression, expected ...any) {
 	assertions.AssertStringEquals(t, value, exp.(*ast.Identifier).Value, "test["+strconv.Itoa(i)+"] exp.(*ast.Identifier).Value wrong")
 }
 
-func testIntegerLiteral(t *testing.T, i int, exp ast.Expression, expected ...any) {
+func testNumberLiteral(t *testing.T, i int, exp ast.Expression, expected ...any) {
 	assertions.AssertTypeOf(t, reflect.TypeOf(ast.NumberLiteral{}), exp, "test["+strconv.Itoa(i)+"] - ast.Expression unexpected type")
 	if 1 != len(expected) {
-		t.Fatalf("testIntegerLiteral: len(expect) wrong: expect=1, actual=%d", len(expected))
+		t.Fatalf("testNumberLiteral: len(expect) wrong: expect=1, actual=%d", len(expected))
 	}
-	value, ok := expected[0].(int)
-	if !ok {
-		t.Fatalf("testIntegerLiteral: expect[0] unexpected type: expect=int64, actual=%T", expected[0])
+	var value float64
+	switch v := expected[0].(type) {
+	case int:
+		value = float64(v)
+	case int64:
+		value = float64(v)
+	case float32:
+		value = float64(v)
+	case float64:
+		value = v
+	default:
+		t.Fatalf("testNumberLiteral: expect[0] unexpected type: expect=float64, actual=%T", expected[0])
 	}
-	assertions.AssertStringEquals(t, fmt.Sprintf("%d", value), exp.(*ast.NumberLiteral).TokenLexeme(), "test["+strconv.Itoa(i)+"] exp.(*ast.NumberLiteral).TokenLexeme() wrong")
-	assertions.AssertInt64Equals(t, int64(value), exp.(*ast.NumberLiteral).Value, "test["+strconv.Itoa(i)+"] exp.(*ast.NumberLiteral).Value wrong")
+	actual, err := strconv.ParseFloat(exp.(*ast.NumberLiteral).TokenLexeme(), 64)
+	if err != nil {
+		t.Fatalf("testNumberLiteral: exp.(*ast.NumberLiteral).TokenLexeme() parse error: %v", err)
+	}
+	assertions.AssertStringEquals(t, fmt.Sprintf("%f", value), fmt.Sprintf("%f", actual), "test["+strconv.Itoa(i)+"] exp.(*ast.NumberLiteral).TokenLexeme() wrong")
+	assertions.AssertFloat64Equals(t, value, exp.(*ast.NumberLiteral).Value, "test["+strconv.Itoa(i)+"] exp.(*ast.NumberLiteral).Value wrong")
 }
 
 func testPrefixExpression(t *testing.T, i int, exp ast.Expression, expected ...any) {

@@ -264,7 +264,7 @@ func TestErrors(t *testing.T) {
 		expected []token.Token
 	}{
 		{
-			`let five = 5.`,
+			"\n\nlet five = 5.",
 			[]token.Token{
 				{Type: token.LET, Lexeme: "let"},
 				{Type: token.IDENT, Lexeme: "five"},

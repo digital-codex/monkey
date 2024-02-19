@@ -1,7 +1,5 @@
 package token
 
-import "strconv"
-
 /*****************************************************************************
  *                                  TYPES                                    *
  *****************************************************************************/
@@ -39,6 +37,7 @@ const (
 	 * Delimiters
 	 */
 	COMMA
+	DOT
 	COLON
 	SEMICOLON
 
@@ -50,7 +49,7 @@ const (
 	RBRACKET
 
 	/*
-	 * Identifiers + lexemes
+	 * Identifiers + Literals
 	 */
 	STRING
 	IDENT
@@ -71,7 +70,7 @@ const (
 	EOF
 )
 
-var lexemes = [...]string{
+var tokens = [...]string{
 	ILLEGAL: "ILLEGAL",
 
 	/*
@@ -94,6 +93,7 @@ var lexemes = [...]string{
 	 * Delimiters
 	 */
 	COMMA:     ",",
+	DOT:       ".",
 	COLON:     ":",
 	SEMICOLON: ";",
 
@@ -105,7 +105,7 @@ var lexemes = [...]string{
 	RBRACKET: "]",
 
 	/*
-	 * Identifiers + lexemes
+	 * Identifiers + Literals
 	 */
 	STRING: "STRING",
 	IDENT:  "IDENT",
@@ -131,12 +131,5 @@ var lexemes = [...]string{
  *****************************************************************************/
 
 func (t Type) String() string {
-	s := ""
-	if ILLEGAL <= t && t < EOF {
-		s = lexemes[t]
-	}
-	if t != EOF && s == "" {
-		s = "Type(" + strconv.Itoa(int(t)) + ")"
-	}
-	return s
+	return tokens[t]
 }

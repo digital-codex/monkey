@@ -40,11 +40,6 @@ type InfixOperation struct {
 }
 
 var operations = map[string][]Operation{
-	"!": {
-		&PrefixOperation{object.ANY, func(right object.Object) object.Object {
-			return convertNativeBoolToBooleanObject(!isTruthy(right))
-		}},
-	},
 	"==": {
 		&InfixOperation{object.ANY, object.ANY, func(left, right object.Object) object.Object {
 			if left.Type() == object.NUMBER && right.Type() == object.NUMBER {
@@ -53,6 +48,11 @@ var operations = map[string][]Operation{
 				return convertNativeBoolToBooleanObject(left.Value == right.Value)
 			}
 			return convertNativeBoolToBooleanObject(left == right)
+		}},
+	},
+	"!": {
+		&PrefixOperation{object.ANY, func(right object.Object) object.Object {
+			return convertNativeBoolToBooleanObject(!isTruthy(right))
 		}},
 	},
 	"!=": {
@@ -373,7 +373,7 @@ func evalIndexExpression(node *ast.IndexExpression, env *object.Environment) obj
 	switch {
 	case left.Type() == object.ARRAY && index.Type() == object.NUMBER:
 		array := left.(*object.Array)
-		i := index.(*object.Number).Value
+		i := int64(index.(*object.Number).Value)
 
 		if i < 0 || i > int64(len(array.Elements)-1) {
 			return NULL
